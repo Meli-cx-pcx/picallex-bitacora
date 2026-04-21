@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bitácora Comercial — PicallEx CX</title>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    :root {
+      --bg: #07071C;
+      --bg2: #0D0D2A;
+      --surf: #111132;
+      --surf2: #181845;
+      --P: #7C3AED;
+      --PL: #A78BFA;
+      --PD: #4C1D95;
+      --PA: rgba(124,58,237,0.15);
+      --PAA: rgba(124,58,237,0.08);
+      --A: #10B981;
+      --AL: rgba(16,185,129,0.15);
+      --W: #F59E0B;
+      --WL: rgba(245,158,11,0.15);
+      --R: #EF4444;
+      --RL: rgba(239,68,68,0.15);
+      --B: #3B82F6;
+      --BL: rgba(59,130,246,0.15);
+      --text: #EDE9FE;
+      --muted: #7C6FAD;
+      --sub: #A89BC8;
+      --border: rgba(167,139,250,0.14);
+      --border2: rgba(167,139,250,0.28);
+      --sh: 0 2px 8px rgba(0,0,0,.4), 0 4px 16px rgba(124,58,237,.12);
+      --shl: 0 6px 30px rgba(124,58,237,.22);
+      --sidebar: 252px;
+      --r: 12px;
+      --r2: 8px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Raleway', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+    a { color: var(--PL); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .container { display: flex; height: 100vh; }
+    .sidebar { width: var(--sidebar); background: linear-gradient(180deg, #080820 0%, #0B0A28 100%); border-right: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; position: relative; z-index: 100; }
+    .sidebar-header { padding: 20px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .logo-text { font-size: 12px; font-weight: 800; letter-spacing: 1.2px; color: var(--PL); text-transform: uppercase; }
+    .logo-sub { font-size: 10px; color: var(--muted); margin-top: 4px; }
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 16px 8px; }
+    .nav-section { margin-bottom: 20px; }
+    .nav-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: .8px; padding: 0 12px; margin-bottom: 8px; display: block; }
+    .nav-divider { height: 1px; background: var(--border); margin: 16px 8px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin: 4px 0; border-radius: var(--r2); border-left: 2px solid transparent; cursor: pointer; transition: all .15s; font-size: 13px; position: relative; }
+    .nav-item:hover { background: rgba(167,139,250,0.08); }
+    .nav-item.active { background: rgba(167,139,250,0.12); color: #fff; font-weight: 700; border-left-color: #A78BFA; }
+    .nav-badge { font-size: 9px; background: rgba(167,139,250,0.25); color: #C4B5FD; padding: 2px 6px; border-radius: 3px; margin-left: auto; }
+    .unread-dot { width: 7px; height: 7px; background: #EF4444; border-radius: 50%; flex-shrink: 0; margin-left: auto; animation: pulse-dot 2s infinite; }
+    @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(.85)} }
+    .main { flex: 1; display: flex; flex-direction: column; background: var(--bg); }
+    .topbar { background: linear-gradient(135deg, #060618 0%, #0D0B2A 50%, #130D35 100%); border-bottom: 1px solid var(--border); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; position: relative; z-index: 50; }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .breadcrumb-back { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--sub); cursor: pointer; transition: color .15s; }
+    .breadcrumb-back:hover { color: var(--text); }
+    .topbar-center { flex: 1; }
+    .search-wrap { position: relative; flex: 0 1 auto; max-width: 350px; }
+    .search-input-wrap { display: flex; align-items: center; gap: 8px; height: 36px; border-radius: var(--r2); background: rgba(167,139,250,0.08); padding: 0 10px; transition: all .2s; }
+    .search-input-wrap.open { background: rgba(167,139,250,0.15); }
+    .search-btn { background: none; border: none; color: var(--PL); cursor: pointer; font-size: 16px; padding: 0; }
+    .search-inp { display: none; background: none; border: none; color: var(--text); font-size: 13px; outline: none; flex: 1; width: 100%; }
+    .search-inp.open { display: block; }
+    .search-inp::placeholder { color: var(--muted); }
+    .search-results { position: absolute; top: 100%; left: 0; right: 0; max-height: 400px; overflow-y: auto; background: var(--surf); border: 1px solid var(--border2); border-radius: var(--r2); margin-top: 8px; display: none; z-index: 1000; }
+    .search-results.open { display: block; }
+    .sr-empty { padding: 16px; text-align: center; color: var(--muted); font-size: 12px; }
+    .sr-item { padding: 10px 12px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .1s; display: flex; gap: 10px; align-items: flex-start; }
+    .sr-item:hover { background: rgba(167,139,250,0.1); }
+    .sr-type { font-size: 10px; font-weight: 700; color: var(--PL); text-transform: uppercase; letter-spacing: .5px; }
+    .sr-title { font-size: 12px; color: var(--text); font-weight: 600; margin-top: 2px; }
+    .sr-snippet { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .tb-badge { font-size: 11px; font-weight: 700; background: rgba(124,58,237,0.2); color: var(--PL); padding: 4px 10px; border-radius: 20px; }
+    .sync-badge { font-size: 10px; padding: 3px 10px; border-radius: 20px; }
+    .sync-badge.local { background: rgba(255,255,255,.08); color: rgba(255,255,255,.5); }
+    .sync-badge.ok { background: rgba(16,185,129,.2); color: #34D399; }
+    .sync-badge.saving { background: rgba(59,130,246,.2); color: #60A5FA; }
+    .sync-badge.error { background: rgba(239,68,68,.2); color: #F87171; }
+    .tb-admin-btn { background: transparent; border: 1px solid rgba(255,255,255,.2); color: var(--muted); padding: 4px 10px; border-radius: 20px; font-size: 10px; cursor: pointer; font-weight: 700; transition: all .15s; }
+    .tb-admin-btn.on { background: rgba(251,191,36,.2); border-color: rgba(251,191,36,.4); color: #FDE68A; }
+    .content { flex: 1; overflow-y: auto; padding: 24px; position: relative; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .hero { background: linear-gradient(135deg, #1a0a4a 0%, #2d1470 40%, #4C1D95 100%); padding: 32px; border-radius: var(--r); margin-bottom: 24px; }
+    .hero-title { font-size: 28px; font-weight: 800; margin-bottom: 20px; }
+    .hero-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; }
+    .stat-box { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); padding: 16px; border-radius: var(--r2); text-align: center; }
+    .stat-num { font-size: 24px; font-weight: 900; color: var(--PL); }
+    .stat-label { font-size: 11px; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: .5px; }
+    .section-title { font-size: 18px; font-weight: 800; margin: 28px 0 16px 0; display: flex; align-items: center; gap: 8px; }
+    .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .ncard { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; transition: all .18s; position: relative; }
+    .ncard:hover { border-color: rgba(167,139,250,0.4); background: rgba(167,139,250,0.04); }
+    .ncard.destacada { border-color: rgba(245,158,11,.45) !important; background: linear-gradient(135deg, rgba(245,158,11,0.07), rgba(245,158,11,0.03)); }
+    .ncard.destacada::before { content: '📌'; position: absolute; top: 10px; right: 10px; font-size: 16px; }
+    .ncard-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+    .ncard-emoji { font-size: 20px; flex-shrink: 0; }
+    .ncard-tag { display: inline-block; font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 8px; }
+    .ncard-tag.purple { background: var(--PA); color: var(--PL); }
+    .ncard-tag.green { background: var(--AL); color: #6EE7B7; }
+    .ncard-tag.warn { background: var(--WL); color: #FCD34D; }
+    .pill { display: inline-block; font-size: 9px; font-weight: 800; letter-spacing: .4px; padding: 2px 7px; border-radius: 4px; margin-right: 6px; }
+    .pill-nuevo { background: #EF4444; color: #fff; }
+    .ncard-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+    .ncard-content { font-size: 13px; color: var(--sub); line-height: 1.6; margin-bottom: 12px; }
+    .ncard-footer { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); }
+    .pin-btn { background: rgba(245,158,11,0.15); border: none; border-radius: 6px; padding: 3px 8px; font-size: 11px; color: #F59E0B; font-weight: 700; cursor: pointer; transition: all .15s; }
+    .pin-btn.pinned { background: rgba(245,158,11,0.3); color: #FDE68A; }
+    .pin-btn:hover { background: rgba(245,158,11,0.25); }
+    .btn { background: var(--P); color: #fff; border: none; padding: 8px 16px; border-radius: var(--r2); cursor: pointer; font-weight: 600; font-size: 13px; transition: all .15s; font-family: 'Raleway', sans-serif; }
+    .btn:hover { background: var(--PL); color: var(--bg); }
+    .btn-secondary { background: transparent; border: 1px solid var(--border2); color: var(--text); }
+    .btn-secondary:hover { background: rgba(167,139,250,0.1); border-color: var(--PL); }
+    .btn-danger { background: var(--R); }
+    .btn-danger:hover { background: #DC2626; }
+    .grid-tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .tool-card { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; text-align: center; cursor: pointer; transition: all .15s; }
+    .tool-card:hover { border-color: var(--border2); box-shadow: var(--sh); }
+    .tool-icon { font-size: 24px; margin-bottom: 8px; }
+    .tool-name { font-size: 12px; font-weight: 700; color: var(--text); }
+    .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .cat-card { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; }
+    .cat-badge { display: inline-block; font-size: 9px; background: var(--PA); color: var(--PL); padding: 3px 8px; border-radius: 4px; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .4px; }
+    .cat-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .cat-desc { font-size: 12px; color: var(--sub); line-height: 1.5; margin-bottom: 12px; }
+    .cat-price { font-size: 13px; font-weight: 700; color: var(--PL); margin-bottom: 10px; }
+    .c2r-tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .c2r-tab { padding: 10px 16px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; }
+    .c2r-tab.active { color: var(--text); border-bottom-color: var(--P); }
+    .c2r-content { display: none; }
+    .c2r-content.active { display: block; }
+    .c2r-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .c2r-card { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; transition: all .15s; }
+    .c2r-card:hover { border-color: var(--border2); }
+    .c2r-card-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+    .c2r-card-content { font-size: 12px; color: var(--sub); line-height: 1.6; }
+    .obj-card { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; margin-bottom: 12px; transition: border-color .15s; }
+    .obj-card:hover { border-color: var(--border2); }
+    .obj-q { font-size: 14px; font-weight: 700; color: var(--text); border-left: 3px solid var(--PL); padding-left: 12px; margin-bottom: 14px; line-height: 1.5; }
+    .obj-a { font-size: 13px; color: var(--sub); line-height: 1.65; padding: 12px 14px; background: var(--PAA); border-radius: 8px; border-left: 3px solid var(--A); }
+    .demo-card { background: var(--surf); border: 1.5px solid var(--border); border-radius: var(--r); padding: 20px; transition: all .18s; }
+    .demo-card:hover { border-color: var(--border2); box-shadow: var(--sh); }
+    .demo-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--PL); margin-bottom: 4px; margin-top: 10px; }
+    .rm-card { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r2); padding: 14px 18px; margin-bottom: 10px; display: flex; gap: 14px; align-items: flex-start; transition: border-color .15s; }
+    .rm-card:hover { border-color: var(--border2); }
+    .rm-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .pill-beta { background: rgba(124,58,237,0.2); color: #C4B5FD; font-size: 9px; padding: 2px 8px; border-radius: 4px; display: inline-block; font-weight: 700; letter-spacing: .3px; }
+    .pill-lanzado { background: rgba(16,185,129,0.15); color: #6EE7B7; font-size: 9px; padding: 2px 8px; border-radius: 4px; display: inline-block; font-weight: 700; letter-spacing: .3px; }
+    .pill-desarrollo { background: rgba(245,158,11,0.15); color: #FCD34D; font-size: 9px; padding: 2px 8px; border-radius: 4px; display: inline-block; font-weight: 700; letter-spacing: .3px; }
+    .pill-proximo { background: rgba(59,130,246,0.15); color: #93C5FD; font-size: 9px; padding: 2px 8px; border-radius: 4px; display: inline-block; font-weight: 700; letter-spacing: .3px; }
+    .rm-content { flex: 1; }
+    .rm-feature { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .rm-date { font-size: 11px; color: var(--muted); margin-top: 8px; }
+    .modal-bg { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center; }
+    .modal-bg.open { display: flex; }
+    .modal { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r); max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 24px; }
+    .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+    .form-input, .form-select, .form-textarea { width: 100%; background: var(--bg2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: var(--r2); font-family: 'Raleway', sans-serif; font-size: 13px; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--PL); background: rgba(167,139,250,0.05); }
+    .form-textarea { resize: vertical; min-height: 100px; }
+    .rte-toolbar { display: flex; gap: 4px; margin-bottom: 8px; padding: 8px; background: var(--bg2); border-radius: var(--r2); border: 1px solid var(--border); }
+    .rte-btn { background: rgba(167,139,250,0.2); border: 1px solid transparent; color: var(--PL); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 700; transition: all .1s; }
+    .rte-btn:hover { background: rgba(167,139,250,0.4); }
+    .rte-input { width: 100%; background: var(--bg2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: var(--r2); font-family: 'Raleway', sans-serif; font-size: 13px; min-height: 100px; }
+    .rte-input:focus { outline: none; border-color: var(--PL); }
+    .form-checkbox { display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 12px; }
+    .form-checkbox input { cursor: pointer; }
+    .form-checkbox label { cursor: pointer; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+    .modal-actions .btn { flex: 1; }
+    .admin-banner { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.25); border-radius: var(--r2); padding: 10px 16px; color: #FDE68A; font-size: 12px; margin-bottom: 16px; display: none; }
+    .admin-banner.show { display: block; }
+    .admin-only { display: none; }
+    .admin-only.show { display: inline-block; }
+    .obj-tabs { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+    .obj-tab { padding: 8px 12px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; }
+    .obj-tab.active { color: var(--text); border-bottom-color: var(--P); }
+    .obj-content { display: none; }
+    .obj-content.active { display: block; }
+    .obj-add-btn { margin-bottom: 16px; }
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .rm-groups { display: flex; flex-direction: column; gap: 24px; }
+    .rm-group-title { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: var(--text); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-text" onclick="goTo('home')" style="cursor:pointer;">📍 Bitácora</div>
+        <div class="logo-sub">PicallEx CX v3.1</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-item active" id="nav-home" onclick="goTo('home')">🏠 Inicio</div>
+        </div>
+        <div class="nav-label">Información</div>
+        <div class="nav-item" id="nav-novedades-com" onclick="goTo('novedades-com')">
+          📣 Novedades Comerciales <span class="nav-badge" id="badge-com">0</span>
+          <span class="unread-dot" id="unread-com" style="display:none;"></span>
+        </div>
+        <div class="nav-item" id="nav-novedades-prod" onclick="goTo('novedades-prod')">
+          🆕 Novedades de Producto <span class="nav-badge" id="badge-prod">0</span>
+          <span class="unread-dot" id="unread-prod" style="display:none;"></span>
+        </div>
+        <div class="nav-item" id="nav-catalogo" onclick="goTo('catalogo')">
+          📦 Catálogo de Productos <span class="nav-badge" id="badge-cat">0</span>
+        </div>
+        <div class="nav-item" id="nav-c2r" onclick="goTo('c2r')">🎯 C2R — Recomendaciones</div>
+        <div class="nav-item" id="nav-objeciones" onclick="goTo('objeciones')">
+          💬 Objeciones Frecuentes <span class="nav-badge" id="badge-obj">0</span>
+          <span class="unread-dot" id="unread-obj" style="display:none;"></span>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-label">Ventas</div>
+        <div class="nav-item" id="nav-demos" onclick="goTo('demos')">
+          🎬 Demos <span class="nav-badge" id="badge-demo">0</span>
+          <span class="unread-dot" id="unread-demo" style="display:none;"></span>
+        </div>
+        <div class="nav-item" id="nav-roadmap" onclick="goTo('roadmap')">
+          🗺️ Roadmap <span class="nav-badge" id="badge-road">0</span>
+          <span class="unread-dot" id="unread-road" style="display:none;"></span>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-label">Herramientas</div>
+        <div class="nav-item" id="nav-herramientas" onclick="goTo('herramientas')">🧮 Herramientas</div>
+      </nav>
+    </div>
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-left">
+          <div class="breadcrumb-back" id="breadcrumb-back" style="display:none;" onclick="goTo('home')">← Volver</div>
+        </div>
+        <div class="topbar-center">
+          <div class="search-wrap" id="search-wrap">
+            <div class="search-input-wrap" id="search-input-wrap">
+              <button class="search-btn" onclick="toggleSearch()" title="Buscar">🔍</button>
+              <input class="search-inp" id="search-inp" placeholder="Buscar en Bitácora..."
+                oninput="onSearch(this.value)" onkeydown="if(event.key==='Escape')closeSearch()">
+            </div>
+            <div class="search-results" id="search-results"></div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <span class="tb-badge" id="date-badge">Abril 2026</span>
+          <span class="sync-badge local" id="sync-status">⚡ Local</span>
+          <button class="tb-admin-btn" id="admin-toggle" onclick="toggleAdmin()">👤 Admin</button>
+        </div>
+      </div>
+      <div class="content">
+        <div id="sec-home" class="section active">
+          <div class="hero">
+            <div class="hero-title">📍 Bitácora Comercial — PicallEx CX</div>
+            <div class="hero-stats">
+              <div class="stat-box">
+                <div class="stat-num" id="stat-com">5</div>
+                <div class="stat-label">Nov. Comerciales</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-num" id="stat-prod">4</div>
+                <div class="stat-label">Nov. Producto</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-num" id="stat-cat">6</div>
+                <div class="stat-label">Productos</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-num" id="stat-demo">4</div>
+                <div class="stat-label">Demos</div>
+              </div>
+            </div>
+          </div>
+          <div id="home-destacadas" style="display:none;">
+            <div class="section-title">📌 Destacadas</div>
+            <div class="news-grid" id="home-destacadas-grid"></div>
+          </div>
+          <div class="section-title">📣 Últimas Novedades Comerciales</div>
+          <div class="news-grid" id="home-news-com"></div>
+          <div class="section-title">🆕 Últimas Novedades de Producto</div>
+          <div class="news-grid" id="home-news-prod"></div>
+          <div class="section-title">⚡ Acceso Rápido</div>
+          <div class="grid-tools">
+            <div class="tool-card" onclick="goTo('catalogo')"><div class="tool-icon">📦</div><div class="tool-name">Catálogo</div></div>
+            <div class="tool-card" onclick="goTo('c2r')"><div class="tool-icon">🎯</div><div class="tool-name">C2R</div></div>
+            <div class="tool-card" onclick="goTo('objeciones')"><div class="tool-icon">💬</div><div class="tool-name">Objeciones</div></div>
+            <div class="tool-card" onclick="goTo('demos')"><div class="tool-icon">🎬</div><div class="tool-name">Demos</div></div>
+            <div class="tool-card" onclick="goTo('roadmap')"><div class="tool-icon">🗺️</div><div class="tool-name">Roadmap</div></div>
+            <div class="tool-card" onclick="goTo('herramientas')"><div class="tool-icon">🧮</div><div class="tool-name">Herramientas</div></div>
+          </div>
+        </div>
+        <div id="sec-novedades-com" class="section">
+          <div class="breadcrumb-back" onclick="goTo('home')">← Volver a Inicio</div>
+          <div class="section-title">📣 Novedades Comerciales</div>
+          <div class="admin-banner" id="admin-banner-com">
+            <strong>👤 Modo Admin:</strong> Puedes editar, crear y eliminar novedades. Las destacadas se marcan con la gema.
+            <button class="btn" style="float:right;padding:3px 10px;font-size:11px;" onclick="openNewsModal('com',null)">+ Nueva</button>
+          </div>
+          <div class="news-grid" id="list-com"></div>
+        </div>
+        <div id="sec-novedades-prod" class="section">
+          <div class="breadcrumb-back" onclick="goTo('home')">← Volver a Inicio</div>
+          <div class="section-title">🆕 Novedades de Producto</div>
+          <div class="admin-banner" id="admin-banner-prod">
+            <strong>👤 Modo Admin:</strong> Puedes editar, crear y eliminar novedades. Las destacadas se marcan con la gema.
+            <button class="btn" style="float:right;padding:3px 10px;font-size:11px;" onclick="openNewsModal('prod',null)">+ Nueva</button>
+          </div>
+          <div class="news-grid" id="list-prod"></div>
+        </div>
+        <div id="sec-catalogo" class="section">
+          <div class="breadcrumb-back" onclick="goTo('home')">← Volver a Inicio</div>
+          <div class="section-title">📦 Catálogo de Productos</div>
+          <div class="admin-banner" id="admin-banner-cat">
+            <strong>👤 Modo Admin:</strong> Puedes editar y crear productos.
+            <button class="btn" style="float:right;padding:3px 10px;font-size:11px;" onclick="openCatalogModal(null)">+ Nuevo</button>
+          </div>
+          <div class="catalog-grid" id="list-cat"></div>
+        </div>
+        <div id="sec-c2r" class="section">
+          <div class="breadcrumb-back" onclick="goTo('home')">← Volver a Inicio</div>
+          <div class="section-title">🎯 C2R — Recomendaciones</div>
+          <div class="c2r-tabs">
+            <div class="c2r-tab active" onclick="switchC2RTab(this,'contactabilidad')">Contactabilidad</div>
+            <div class="c2r-tab" onclick="switchC2RTab(this,'campanias')">Campañas</div>
+            <div class="c2r-tab" onclick="switchC2RTab(this,'beneficios')">Beneficios</div>
+          </div>
+          <div class="c2r-content active" id="c2r-contactabilidad"></div>
+          <div class="c2r-content" id="c2r-campanias"></div>
+          <div class="c2r-content" id="c2r-beneficios"></div>
+        </div>
+        <div id="sec-objeciones" class="section">
+          <div class="breadcrumb-back" onclick="goTo('home')">← Volver a Inicio</div>
+          <div class="section-title">💬 Objeciones Frecuentes</div>
+          <div class="admin-banner" id="admin-banner-obj">
+            <strong>👤 Modo Admin:</strong> Puedes editar, crear y eliminar objeciones.
+            <button class="btn" style="float:right;padding:3px 10px;font-size:11px;" onclick="openObjModal(null)">+ Nueva</button>
+          </div>
+          <div class="obj-tabs">
+            <div class="obj-tab active" onclick="switchObjTab(this,'General')">General</div>
+            <div class="obj-tab" onclick="switchObjTab(this,'Contact Center')">Contact Center</div>
+            <div class="obj-tab" onclick="switchObjTab(this,'ChatBot')">ChatBot</div>
+            <div class="obj-tab" onclick="switchObjTab(this,'Dialer')">Dialer</div>
+            <div class="obj-tab" onclick="switchObjTab(this,'WhatsApp Business')">WhatsApp</div>
+            <div class="obj-tab" onclick="switchObjTab(this,'VoiceBot')">VoiceBot</div>
+          </div>
+          <div class="obj-content active" id="obj-General"></div>
+          <div class="obj-content" id="obj-Contact Center"></div>
+          <div class="obj-content" id="obj-ChatBot"></div>
+          <div class="obj-content" id="obj-Dialer"></div>
+          <div class="obj-content" id="obj-WhatsApp Business"></div>
+          <div class="obj-content" id="obj-VoiceBot"></div>
+        </div>
+        <div id="sec-demos" class="section">
+          <div class="breadcrumb-back" onclick="goTo('home')">← Volver a Inicio</div>
+          <div class="section-title">🎬 Demos y Casos de Uso</div>
+          <div class="admin-banner" id="admin-banner-demo">
+            <strong>👤 Modo Admin:</strong> Puedes editar, crear y eliminar demos.
+            <button class="btn" style="float:right;padding:3px 10px;font-size:11px;" onclick="openDemoModal(null)">+ Nueva</button>
+          </div>
+          <div class="demo-grid" id="list-demos"></div>
+        </div>
+        <div id="sec-roadmap" class="section">
+          <div class="breadcrumb-back" onclick="goTo('home')">← Volver a Inicio</div>
+          <div class="section-title">🗺️ Roadmap de Producto</div>
+          <div class="admin-banner" id="admin-banner-road">
+            <strong>👤 Modo Admin:</strong> Puedes editar, crear y eliminar items.
+            <button class="btn" style="float:right;padding:3px 10px;font-size:11px;" onclick="openRoadmapModal(null)">+ Nuevo</button>
+          </div>
+          <div class="rm-groups" id="list-roadmap"></div>
+        </div>
+        <div id="sec-herramientas" class="section">
+          <div class="breadcrumb-back" onclick="goTo('home')">← Volver a Inicio</div>
+          <div class="section-title">🧮 Herramientas</div>
+          <div style="background:var(--surf);border:1px solid var(--border);border-radius:var(--r);padding:24px;text-align:center;color:var(--muted);">
+            <div style="font-size:32px;margin-bottom:16px;">🛠️</div>
+            <div style="font-size:14px;margin-bottom:8px;">Herramientas en construcción</div>
+            <div style="font-size:12px;">Próximamente: calculadores, templates, y más recursos comerciales.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALS -->
+  <div class="modal-bg" id="modal-news">
+    <div class="modal">
+      <div class="modal-title">Novedades</div>
+      <div class="form-group">
+        <label class="form-label">Emoji</label>
+        <input class="form-input" id="news-emoji" placeholder="📣" maxlength="2">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tag</label>
+        <input class="form-input" id="news-tag" placeholder="Nueva funcionalidad">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Color del Tag</label>
+        <select class="form-select" id="news-tagColor">
+          <option value="purple">Purple</option>
+          <option value="green">Green</option>
+          <option value="warn">Warn</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Título</label>
+        <input class="form-input" id="news-title" placeholder="Título de la noticia">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contenido (HTML)</label>
+        <textarea class="form-textarea" id="news-content" placeholder="Contenido con formato"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fecha</label>
+        <input class="form-input" id="news-date" placeholder="Abril 2026">
+      </div>
+      <div class="form-checkbox">
+        <input type="checkbox" id="news-vigente">
+        <label for="news-vigente">Vigente</label>
+      </div>
+      <div class="form-checkbox">
+        <input type="checkbox" id="news-destacado">
+        <label for="news-destacado">Destacada</label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-news')">Cancelar</button>
+        <button class="btn" onclick="saveNews()">Guardar</button>
+        <button class="btn btn-danger admin-only" id="delete-news-btn" style="display:none;" onclick="if(confirm('¿Eliminar?')) deleteNews()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="modal-catalog">
+    <div class="modal">
+      <div class="modal-title">Catálogo</div>
+      <div class="form-group">
+        <label class="form-label">Nombre</label>
+        <input class="form-input" id="cat-name" placeholder="Nombre del producto">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descripción</label>
+        <textarea class="form-textarea" id="cat-desc"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Precio</label>
+        <input class="form-input" id="cat-price" placeholder="$99/mes">
+      </div>
+      <div class="form-checkbox">
+        <input type="checkbox" id="cat-vigente">
+        <label for="cat-vigente">Vigente</label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-catalog')">Cancelar</button>
+        <button class="btn" onclick="saveCatalog()">Guardar</button>
+        <button class="btn btn-danger admin-only" id="delete-cat-btn" style="display:none;" onclick="if(confirm('¿Eliminar?')) deleteCatalog()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="modal-c2r">
+    <div class="modal">
+      <div class="modal-title">C2R</div>
+      <div class="form-group">
+        <label class="form-label">Título</label>
+        <input class="form-input" id="c2r-title" placeholder="Título">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contenido</label>
+        <textarea class="form-textarea" id="c2r-content" placeholder="Contenido"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-c2r')">Cancelar</button>
+        <button class="btn" onclick="saveC2R()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="modal-obj">
+    <div class="modal">
+      <div class="modal-title">Objeción</div>
+      <div class="form-group">
+        <label class="form-label">Producto</label>
+        <select class="form-select" id="obj-product">
+          <option>General</option>
+          <option>Contact Center</option>
+          <option>ChatBot</option>
+          <option>Dialer</option>
+          <option>WhatsApp Business</option>
+          <option>VoiceBot</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Objeción</label>
+        <textarea class="form-textarea" id="obj-objection" placeholder="La objeción del cliente"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Respuesta</label>
+        <div class="rte-toolbar">
+          <button class="rte-btn" onclick="rteCmd('bold')"><strong>B</strong></button>
+          <button class="rte-btn" onclick="rteCmd('italic')"><em>I</em></button>
+          <button class="rte-btn" onclick="insertEmoji('obj-response')">😊</button>
+        </div>
+        <textarea class="rte-input" id="obj-response" placeholder="Tu respuesta"></textarea>
+      </div>
+      <div class="form-checkbox">
+        <input type="checkbox" id="obj-vigente">
+        <label for="obj-vigente">Vigente</label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-obj')">Cancelar</button>
+        <button class="btn" onclick="saveObj()">Guardar</button>
+        <button class="btn btn-danger admin-only" id="delete-obj-btn" style="display:none;" onclick="if(confirm('¿Eliminar?')) deleteObj()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="modal-demo">
+    <div class="modal">
+      <div class="modal-title">Demo</div>
+      <div class="form-group">
+        <label class="form-label">Producto</label>
+        <input class="form-input" id="demo-product" placeholder="Contact Center">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Emoji</label>
+        <input class="form-input" id="demo-icon" placeholder="📞" maxlength="2">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Título</label>
+        <input class="form-input" id="demo-title" placeholder="Título de la demo">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Caso de Uso</label>
+        <textarea class="form-textarea" id="demo-useCase" placeholder="Caso de uso"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Perfil Ideal</label>
+        <textarea class="form-textarea" id="demo-clientProfile" placeholder="Perfil del cliente ideal"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Link (URL)</label>
+        <input class="form-input" id="demo-link" placeholder="https://...">
+      </div>
+      <div class="form-checkbox">
+        <input type="checkbox" id="demo-vigente">
+        <label for="demo-vigente">Vigente</label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-demo')">Cancelar</button>
+        <button class="btn" onclick="saveDemo()">Guardar</button>
+        <button class="btn btn-danger admin-only" id="delete-demo-btn" style="display:none;" onclick="if(confirm('¿Eliminar?')) deleteDemo()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="modal-roadmap">
+    <div class="modal">
+      <div class="modal-title">Roadmap</div>
+      <div class="form-group">
+        <label class="form-label">Feature</label>
+        <input class="form-input" id="rm-feature" placeholder="Nombre de la feature">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Producto</label>
+        <input class="form-input" id="rm-product" placeholder="Nombre del producto">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Estado</label>
+        <select class="form-select" id="rm-status">
+          <option value="beta">Beta</option>
+          <option value="lanzado">Lanzado</option>
+          <option value="desarrollo">En Desarrollo</option>
+          <option value="proximo">Próximo Lanzamiento</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fecha Esperada</label>
+        <input class="form-input" id="rm-date" placeholder="Q2 2026">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descripción</label>
+        <textarea class="form-textarea" id="rm-desc" placeholder="Descripción"></textarea>
+      </div>
+      <div class="form-checkbox">
+        <input type="checkbox" id="rm-vigente">
+        <label for="rm-vigente">Vigente</label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-roadmap')">Cancelar</button>
+        <button class="btn" onclick="saveRoadmap()">Guardar</button>
+        <button class="btn btn-danger admin-only" id="delete-rm-btn" style="display:none;" onclick="if(confirm('¿Eliminar?')) deleteRoadmap()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="modal-confirm">
+    <div class="modal">
+      <div class="modal-title" id="confirm-title">¿Confirmar?</div>
+      <div id="confirm-message" style="margin-bottom:20px;color:var(--sub);"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal('modal-confirm')">Cancelar</button>
+        <button class="btn" id="confirm-btn" onclick="confirmAction()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ══ SUPABASE CONFIG ══
+    const SUPABASE_URL = '';
+    const SUPABASE_KEY = '';
+    const USE_DB = !!(SUPABASE_URL && SUPABASE_KEY);
+    let _sb = null;
+    if(USE_DB) {
+      try { _sb = window.supabase?.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e){}
+    }
+
+    // ══ STATE ══
+    let isAdmin = false;
+    let DATA = {};
+    let READ_ITEMS = new Set();
+    let currentEditType = null;
+    let currentEditId = null;
+
+    const DEFAULTS = {
+      novedadesCom: [
+        { id:1, emoji:'🔀', tag:'Nueva funcionalidad', tagColor:'purple', title:'Caller IDs Rotativos disponibles', content:'Ahora disponibles como add-on. <b>Paquetes de 10, 50 y 100 IDs</b> con setup incluido en primera mensualidad.', date:'Abril 2026', vigente:true, destacado:true },
+        { id:2, emoji:'📲', tag:'Precio actualizado', tagColor:'green', title:'Dialer: 8 tiers de capacidad', content:'Tabla de precios ampliada: <b>desde 5 hasta 300 llamadas concurrentes</b>. Activación $49 en todos los tiers.', date:'Abril 2026', vigente:true, destacado:false },
+        { id:3, emoji:'💬', tag:'Corrección comercial', tagColor:'warn', title:'WhatsApp Business: pricing clarificado', content:'Plan base <b>$59</b> (1 línea + 3 usuarios). Líneas adicionales $25 c/u · Usuarios adicionales $10 c/u.', date:'Abril 2026', vigente:true, destacado:false },
+        { id:4, emoji:'🌐', tag:'Nuevo add-on', tagColor:'purple', title:'Local Numbers USA y otros países', content:'Números locales USA a <b>$9.95/número/mes</b>. Disponible en transaccional y como add-on.', date:'Abril 2026', vigente:true, destacado:false },
+        { id:5, emoji:'💬', tag:'Precio actualizado', tagColor:'green', title:'ChatBot: nueva tabla transaccional (16-Mar-2026)', content:'Tier 1: <b>$0.10/conv · mín $50 · 1 WF</b>. Tier 2: $0.08 · mín $200 · 2 WF. Tier 3: $0.06 · mín $400 · 5 WF. <b>WF adicional: $50/mes.</b>', date:'Marzo 2026', vigente:true, destacado:true },
+      ],
+      novedadesProd: [
+        { id:1, emoji:'📞', tag:'Lanzamiento', tagColor:'purple', title:'Contact Center Omnicanal v2.0', content:'Integración nativa de <b>llamadas, WhatsApp, chat y email</b> con CRM unificado. Historial 360° del cliente en una pantalla.', date:'Abril 2026', vigente:true, destacado:false },
+        { id:2, emoji:'🤖', tag:'Beta', tagColor:'purple', title:'ChatBot con IA Generativa', content:'Respuestas contextuales con entrenamiento por industria. Derivación automática a agentes cuando es necesario.', date:'Abril 2026', vigente:true, destacado:false },
+        { id:3, emoji:'📲', tag:'Mejora', tagColor:'green', title:'Dialer Predictivo v3', content:'Reducción de bloqueos con <b>Caller IDs Rotativos</b>. Algoritmo de predictivo mejorado + Scan & Clean & Go integrado.', date:'Marzo 2026', vigente:true, destacado:false },
+        { id:4, emoji:'🎙', tag:'GA', tagColor:'green', title:'VoiceBot con voz natural', content:'Respuesta de voz con IA, entiende lenguaje natural, resuelve automáticamente. Disponible en 5 idiomas.', date:'Marzo 2026', vigente:true, destacado:true },
+      ],
+      catalogo: [
+        { id:1, name:'Contact Center Pro', desc:'Centro de contacto omnicanal con CRM integrado. Soporta llamadas, WhatsApp, chat, email. Reportes avanzados.', price:'$299/mes', vigente:true },
+        { id:2, name:'Dialer Predictivo', desc:'Llamadas salientes automatizadas. Caller IDs rotativos. Limpieza de base de datos. Máx 300 llamadas concurrentes.', price:'$199/mes', vigente:true },
+        { id:3, name:'ChatBot Avanzado', desc:'Chatbot con IA. Integración con WhatsApp, web, Messenger. Workflows personalizables. Derivación a agentes.', price:'$150/mes', vigente:true },
+        { id:4, name:'VoiceBot IVR', desc:'IVR con IA generativa. Voz natural, entiende lenguaje natural. Menú dinámico, consultas automatizadas.', price:'$250/mes', vigente:true },
+        { id:5, name:'WhatsApp Business', desc:'API oficial de WhatsApp. Campañas masivas, templates, CRM. Multi-agente, automatización.', price:'$59/mes', vigente:true },
+        { id:6, name:'Analytics Premium', desc:'Dashboard con métricas en tiempo real. Reportes customizables. Exportación de datos. SLA tracking.', price:'$99/mes', vigente:true },
+      ],
+      c2r: {
+        contactabilidad: [
+          { id:1, title:'Caller IDs Rotativos para Dialers', content:'Distribuyen automáticamente el volumen de llamadas salientes. Reducen bloqueos hasta 80%. Paquetes de 10, 50, 100 IDs.' },
+          { id:2, title:'Scan, Clean & Go para Limpieza de BD', content:'Valida números antes de llamar. Remove números inválidos, do-not-call. Mejora tasa de contactabilidad 40%+.' },
+          { id:3, title:'Horarios Estratégicos de Outbound', content:'Configuración de horas de máxima respuesta por zona geográfica. Timing automatizado para mejor contactabilidad.' },
+        ],
+        campanias: [
+          { id:1, title:'Campañas WhatsApp Masivas', content:'Templates pre-hechas, scheduling, A/B testing. Resultados 3x mejores que email. Abandono bajo.' },
+          { id:2, title:'Secuencias de Email Nurture', content:'Workflows automáticos de seguimiento. Scoring de leads. Integración con CRM para cierre de ventas.' },
+          { id:3, title:'Outbound Telefónico Predictivo', content:'Dialer predictivo que ajusta ritmo según disponibilidad de agentes. 70% menos tiempo muerto.' },
+        ],
+        beneficios: [
+          { id:1, title:'Reducción de Tiempo en Gestión Administrativa', content:'Automatización de tareas repetitivas: dialing, lead scoring, follow-up. Agentes 40% más productivos.' },
+          { id:2, title:'Mejor Experiencia del Cliente', content:'Respuesta rápida omnicanal, historial centralizado, sin repetir información. NPS +20%.' },
+          { id:3, title:'ROI en 90 Días', content:'Implementación rápida, adopción inmediata. Clientes reportan payback en 3 meses.' },
+        ],
+      },
+      objeciones: [
+        { id:1, product:'General', objection:'Es muy caro comparado con otras soluciones del mercado.', response:'El precio de PicallEx incluye un ecosistema completo integrado de forma nativa: CRM, PBX, Dialer, WA, Bot y Analytics. Las soluciones puntuales que parecen más baratas requieren integraciones costosas, múltiples proveedores y mantenimiento adicional. El TCO real de PicallEx es significativamente menor.', vigente:true },
+        { id:2, product:'General', objection:'Necesitamos pensarlo, estamos evaluando otras opciones.', response:'Perfecto. Para ayudarte a evaluar mejor, podemos hacer una demo personalizada con tu caso de uso específico y una comparativa directa con las soluciones que estás evaluando. ¿Tenés 30 minutos esta semana para eso?', vigente:true },
+        { id:3, product:'Contact Center', objection:'Ya tenemos una plataforma implementada, cambiar es muy costoso.', response:'Entendemos el costo de migración. Por eso ofrecemos un proceso de onboarding asistido con migración de datos y configuración incluida. Además, el período de transición permite operar en paralelo hasta que el equipo esté seguro. La mayoría de los clientes recuperan la inversión en los primeros 3 meses.', vigente:true },
+        { id:4, product:'ChatBot', objection:'No sé si el bot va a entender bien a mis clientes.', response:'El ChatBot de PicallEx usa NLP con entrenamiento específico para tu industria. Además, el flujo de derivación garantiza que cuando el bot no pueda resolver, derive instantáneamente a un agente humano. En la demo te mostramos cómo configurar y entrenar los flujos en minutos.', vigente:true },
+        { id:5, product:'Dialer', objection:'Ya probamos un Dialer y no funcionó bien, los números se bloquearon.', response:'El bloqueo de números es el problema #1 de los dialers mal configurados. PicallEx incluye Caller IDs Rotativos (paquetes de 10 a 100 IDs) que distribuyen automáticamente el volumen de llamadas, reduciendo el bloqueo hasta en un 80%. Combinado con Scan, Clean & Go para limpiar la base, el resultado es completamente diferente.', vigente:true },
+        { id:6, product:'WhatsApp Business', objection:'¿Por qué pagar por WhatsApp si es gratis?', response:'WhatsApp personal es gratuito pero no permite automatización, múltiples agentes, templates de campaña, ni historial de conversaciones centralizado. La API Oficial de WhatsApp Business permite gestionar cientos de conversaciones simultáneas, campañas masivas y automatización con ChatBot. Es la diferencia entre una herramienta personal y una plataforma de negocio.', vigente:true },
+        { id:7, product:'VoiceBot', objection:'Nuestros clientes prefieren hablar con personas, no con robots.', response:'El VoiceBot de PicallEx está diseñado para manejar los volúmenes altos de consultas repetitivas (horarios, saldos, estados de pedido, etc.) liberando a los agentes para interacciones de mayor valor. La derivación a humano es instantánea cuando el cliente lo solicita. En promedio, el 60-70% de las consultas se resuelven sin agente, mejorando los tiempos de espera para todos.', vigente:true },
+      ],
+      demos: [
+        { id:1, product:'Contact Center', icon:'📞', title:'Demo: Contact Center Omnicanal', useCase:'Gestión unificada de llamadas, WhatsApp y chat con CRM integrado. Los agentes ven el historial completo del cliente en una sola pantalla.', clientProfile:'Empresas de 20+ agentes con operación mixta de llamadas entrantes, salientes y atención por chat.', link:'', vigente:true },
+        { id:2, product:'ChatBot', icon:'🤖', title:'Demo: ChatBot en WhatsApp 24/7', useCase:'Atención automatizada en WhatsApp: el bot responde consultas frecuentes, califica leads y deriva a agentes en horario comercial.', clientProfile:'Empresas con alto volumen de consultas repetitivas por WhatsApp que quieren reducir carga del equipo.', link:'', vigente:true },
+        { id:3, product:'Dialer', icon:'📲', title:'Demo: Dialer Predictivo con Caller IDs', useCase:'Campaña de contactabilidad masiva: el Dialer llama automáticamente, el agente solo toma llamadas contestadas. Caller IDs Rotativos evitan bloqueos.', clientProfile:'Operaciones de telemarketing, cobranzas o encuestas con 10+ agentes salientes.', link:'', vigente:true },
+        { id:4, product:'VoiceBot', icon:'🎙', title:'Demo: VoiceBot con IA Generativa', useCase:'El VoiceBot atiende llamadas entrantes, entiende lenguaje natural, resuelve consultas automáticamente y transfiere cuando es necesario.', clientProfile:'Empresas con alto volumen de llamadas entrantes repetitivas: bancos, utilities, retail, salud.', link:'', vigente:true },
+      ],
+      roadmap: [
+        { id:1, feature:'VoiceBot con IA Generativa — GA', product:'VoiceBot', status:'beta', expectedDate:'Q2 2026', description:'Lanzamiento general del VoiceBot con respuestas generativas. Actualmente disponible en beta para clientes Enterprise. Acceso anticipado bajo solicitud.', vigente:true },
+        { id:2, feature:'Transcripciones en Tiempo Real', product:'Contact Center', status:'lanzado', expectedDate:'Feb 2026', description:'Las transcripciones se generan durante la llamada, no solo al finalizar. Disponible en plans Team y Business.', vigente:true },
+        { id:3, feature:'Analytics de WhatsApp Avanzado', product:'Analytics', status:'lanzado', expectedDate:'Abr 2026', description:'Nuevos paneles de métricas WA: tasa de lectura, tiempo de respuesta, conversaciones por agente, efectividad de templates.', vigente:true },
+        { id:4, feature:'One-pagers de Producto Descargables', product:'General', status:'desarrollo', expectedDate:'Q3 2026', description:'Fichas de producto en PDF listos para enviar a prospectos y clientes. Generados automáticamente desde el catálogo.', vigente:true },
+        { id:5, feature:'Templates de Email Personalizables', product:'General', status:'proximo', expectedDate:'Q3 2026', description:'Plantillas de seguimiento, propuesta y onboarding para el equipo comercial. Editables desde la Bitácora.', vigente:true },
+        { id:6, feature:'Integración CRM Externo (HubSpot / Salesforce)', product:'Contact Center', status:'desarrollo', expectedDate:'Q4 2026', description:'Sincronización nativa de contactos, deals y actividades entre PicallEx y CRMs externos.', vigente:true },
+      ],
+    };
+
+    function mergeData(saved) {
+      const merged = { ...DEFAULTS, ...saved };
+      if(!merged.objeciones) merged.objeciones = DEFAULTS.objeciones;
+      if(!merged.demos) merged.demos = DEFAULTS.demos;
+      if(!merged.roadmap) merged.roadmap = DEFAULTS.roadmap;
+      merged.novedadesCom = (merged.novedadesCom || []).map(n => ({ ...n, destacado: n.destacado ?? false }));
+      merged.novedadesProd = (merged.novedadesProd || []).map(n => ({ ...n, destacado: n.destacado ?? false }));
+      return merged;
+    }
+
+    async function loadData() {
+      if(USE_DB && _sb) {
+        try {
+          const { data, error } = await _sb.from('bitacora_data').select('data').eq('id', 1).single();
+          if(!error && data?.data) { DATA = mergeData(data.data); setSyncStatus('ok'); return; }
+        } catch(e){}
+        setSyncStatus('local');
+      }
+      try {
+        const s = localStorage.getItem('picallex_bitacora_v3');
+        if(s) DATA = mergeData(JSON.parse(s));
+      } catch(e){}
+      if(!DATA.novedadesCom) DATA = mergeData({});
+      setSyncStatus(USE_DB ? 'error' : 'local');
+    }
+
+    async function saveData() {
+      try { localStorage.setItem('picallex_bitacora_v3', JSON.stringify(DATA)); } catch(e){}
+      if(USE_DB && _sb) {
+        setSyncStatus('saving');
+        try {
+          await _sb.from('bitacora_data').upsert({ id: 1, data: DATA, updated_at: new Date().toISOString() });
+          setSyncStatus('ok');
+        } catch(e) { setSyncStatus('error'); }
+      }
+    }
+
+    function setSyncStatus(status) {
+      const el = document.getElementById('sync-status');
+      el.classList.remove('local', 'ok', 'saving', 'error');
+      if(status === 'local') el.textContent = '⚡ Local';
+      else if(status === 'ok') el.textContent = '✅ Sincronizado';
+      else if(status === 'saving') el.textContent = '⟳ Guardando...';
+      else if(status === 'error') el.textContent = '⚠️ Error sync';
+      el.classList.add(status);
+    }
+
+    function updateTopBarDate() {
+      const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      const now = new Date();
+      document.getElementById('date-badge').textContent = months[now.getMonth()] + ' ' + now.getFullYear();
+    }
+
+    function toggleAdmin() {
+      isAdmin = !isAdmin;
+      document.getElementById('admin-toggle').classList.toggle('on', isAdmin);
+      document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'inline-block' : 'none');
+      document.querySelectorAll('.admin-banner').forEach(el => el.classList.toggle('show', isAdmin));
+      document.querySelectorAll('.pin-btn').forEach(el => el.style.display = isAdmin ? 'inline-block' : 'none');
+      renderAll();
+    }
+
+    function goTo(section) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById('sec-' + section).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      const nav = document.getElementById('nav-' + section);
+      if(nav) nav.classList.add('active');
+      document.getElementById('breadcrumb-back').style.display = section === 'home' ? 'none' : 'flex';
+      markSectionRead(section);
+      if(section !== 'home') window.scrollTo(0, 0);
+    }
+
+    function markSectionRead(section) {
+      const sectionMap = {
+        'novedades-com': { type: 'com', items: DATA.novedadesCom },
+        'novedades-prod': { type: 'prod', items: DATA.novedadesProd },
+        'objeciones': { type: 'obj', items: DATA.objeciones },
+        'demos': { type: 'demo', items: DATA.demos },
+        'roadmap': { type: 'road', items: DATA.roadmap },
+      };
+      const map = sectionMap[section];
+      if(map && map.items) {
+        map.items.forEach(item => READ_ITEMS.add(map.type + ':' + item.id));
+      }
+      localStorage.setItem('picallex_read_v1', JSON.stringify([...READ_ITEMS]));
+      updateUnreadDots();
+    }
+
+    function updateUnreadDots() {
+      const sections = [
+        { dot: 'unread-com', items: DATA.novedadesCom, type: 'com' },
+        { dot: 'unread-prod', items: DATA.novedadesProd, type: 'prod' },
+        { dot: 'unread-obj', items: DATA.objeciones, type: 'obj' },
+        { dot: 'unread-demo', items: DATA.demos, type: 'demo' },
+        { dot: 'unread-road', items: DATA.roadmap, type: 'road' },
+      ];
+      sections.forEach(s => {
+        const count = (s.items || []).filter(i => !READ_ITEMS.has(s.type + ':' + i.id)).length;
+        document.getElementById(s.dot).style.display = count > 0 ? 'block' : 'none';
+      });
+    }
+
+    function renderAll() {
+      renderHomeNews();
+      renderNewsList('com');
+      renderNewsList('prod');
+      renderCatalog();
+      renderC2R();
+      renderObjeciones();
+      renderDemos();
+      renderRoadmap();
+      updateCounts();
+    }
+
+    function updateCounts() {
+      document.getElementById('stat-com').textContent = DATA.novedadesCom.filter(n => n.vigente).length;
+      document.getElementById('stat-prod').textContent = DATA.novedadesProd.filter(n => n.vigente).length;
+      document.getElementById('stat-cat').textContent = DATA.catalogo.filter(c => c.vigente).length;
+      document.getElementById('stat-demo').textContent = DATA.demos.filter(d => d.vigente).length;
+      document.getElementById('badge-com').textContent = DATA.novedadesCom.filter(n => n.vigente).length;
+      document.getElementById('badge-prod').textContent = DATA.novedadesProd.filter(n => n.vigente).length;
+      document.getElementById('badge-cat').textContent = DATA.catalogo.filter(c => c.vigente).length;
+      document.getElementById('badge-obj').textContent = DATA.objeciones.filter(o => o.vigente).length;
+      document.getElementById('badge-demo').textContent = DATA.demos.filter(d => d.vigente).length;
+      document.getElementById('badge-road').textContent = DATA.roadmap.filter(r => r.vigente).length;
+    }
+
+    function renderHomeNews() {
+      const destacadas = DATA.novedadesCom.filter(n => n.vigente && n.destacado).concat(DATA.novedadesProd.filter(n => n.vigente && n.destacado));
+      const destEl = document.getElementById('home-destacadas');
+      if(destacadas.length > 0) {
+        destEl.style.display = 'block';
+        document.getElementById('home-destacadas-grid').innerHTML = destacadas.slice(0, 3).map(n => renderNewsCard(n, 'com')).join('');
+      } else {
+        destEl.style.display = 'none';
+      }
+      const recentCom = DATA.novedadesCom.filter(n => n.vigente).slice(0, 3);
+      document.getElementById('home-news-com').innerHTML = recentCom.map(n => renderNewsCard(n, 'com')).join('');
+      const recentProd = DATA.novedadesProd.filter(n => n.vigente).slice(0, 3);
+      document.getElementById('home-news-prod').innerHTML = recentProd.map(n => renderNewsCard(n, 'prod')).join('');
+    }
+
+    function renderNewsCard(n, type) {
+      const isNew = !READ_ITEMS.has(type + ':' + n.id);
+      const highlighted = n.destacado ? 'destacada' : '';
+      const pin = isAdmin ? `<button class="pin-btn ${n.destacado ? 'pinned' : ''}" onclick="toggleDestacado('${type}',${n.id})">${n.destacado ? '📌' : '📍'}</button>` : '';
+      return `<div class="ncard ${highlighted}">
+        <div class="ncard-header">
+          <div class="ncard-emoji">${n.emoji}</div>
+          <div>${pin}</div>
+        </div>
+        <div class="ncard-tag ${n.tagColor}">${n.tag}${isNew ? ' <span class="pill pill-nuevo">NUEVO</span>' : ''}</div>
+        <div class="ncard-title">${n.title}</div>
+        <div class="ncard-content">${n.content}</div>
+        <div class="ncard-footer">
+          <span>${n.date}</span>
+          ${isAdmin ? `<button class="btn" style="padding:3px 8px;font-size:11px;" onclick="openNewsModal('${type}',${n.id})">Editar</button>` : ''}
+        </div>
+      </div>`;
+    }
+
+    function renderNewsList(type) {
+      const list = type === 'com' ? DATA.novedadesCom : DATA.novedadesProd;
+      const filteredList = list.filter(n => n.vigente);
+      const containerId = type === 'com' ? 'list-com' : 'list-prod';
+      document.getElementById(containerId).innerHTML = filteredList.map(n => renderNewsCard(n, type)).join('');
+    }
+
+    function renderCatalog() {
+      const items = DATA.catalogo.filter(c => c.vigente);
+      document.getElementById('list-cat').innerHTML = items.map(c => `<div class="cat-card">
+        <div class="cat-badge">Producto</div>
+        <div class="cat-name">${c.name}</div>
+        <div class="cat-desc">${c.desc}</div>
+        <div class="cat-price">${c.price}</div>
+        ${isAdmin ? `<button class="btn" style="padding:3px 8px;font-size:11px;" onclick="openCatalogModal(${c.id})">Editar</button>` : ''}
+      </div>`).join('');
+    }
+
+    function renderC2R() {
+      ['contactabilidad', 'campanias', 'beneficios'].forEach(tab => {
+        const items = DATA.c2r[tab] || [];
+        document.getElementById('c2r-' + tab).innerHTML = `<div class="c2r-grid">${items.map(i => `<div class="c2r-card">
+          <div class="c2r-card-title">${i.title}</div>
+          <div class="c2r-card-content">${i.content}</div>
+        </div>`).join('')}</div>`;
+      });
+    }
+
+    function renderObjeciones() {
+      const products = ['General', 'Contact Center', 'ChatBot', 'Dialer', 'WhatsApp Business', 'VoiceBot'];
+      products.forEach(prod => {
+        const items = DATA.objeciones.filter(o => o.vigente && o.product === prod);
+        document.getElementById('obj-' + prod).innerHTML = items.map(o => `<div class="obj-card">
+          <div class="obj-q">❓ ${o.objection}</div>
+          <div class="obj-a">💡 ${o.response}</div>
+          ${isAdmin ? `<div style="margin-top:10px;"><button class="btn" style="padding:3px 8px;font-size:11px;margin-right:4px;" onclick="openObjModal(${o.id})">Editar</button><button class="btn btn-danger" style="padding:3px 8px;font-size:11px;" onclick="if(confirm('¿Eliminar?')) deleteObj(${o.id})">Eliminar</button></div>` : ''}
+        </div>`).join('');
+      });
+    }
+
+    function renderDemos() {
+      const items = DATA.demos.filter(d => d.vigente);
+      document.getElementById('list-demos').innerHTML = items.map(d => `<div class="demo-card">
+        <div style="font-size:28px;margin-bottom:10px;">${d.icon}</div>
+        <div class="demo-section-label">${d.product}</div>
+        <div class="ncard-title">${d.title}</div>
+        <div class="demo-section-label">📌 Caso de Uso</div>
+        <div style="font-size:12px;color:var(--sub);margin-bottom:10px;">${d.useCase}</div>
+        <div class="demo-section-label">👤 Perfil Ideal</div>
+        <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">${d.clientProfile}</div>
+        ${d.link ? `<a href="${d.link}" target="_blank" class="btn" style="display:inline-block;width:auto;">▶ Ver Demo</a>` : `<button class="btn" style="opacity:.5;cursor:not-allowed;">▶ Sin Link</button>`}
+        ${isAdmin ? `<button class="btn" style="padding:3px 8px;font-size:11px;margin-top:8px;width:100%;" onclick="openDemoModal(${d.id})">Editar</button>` : ''}
+      </div>`).join('');
+    }
+
+    function renderRoadmap() {
+      const statusOrder = { beta: 0, lanzado: 1, desarrollo: 2, proximo: 3 };
+      const statusMap = {
+        beta: { emoji: '🔬', label: 'En Beta', color: '#C4B5FD', dotColor: '#A78BFA' },
+        lanzado: { emoji: '🚀', label: 'Lanzado', color: '#6EE7B7', dotColor: '#34D399' },
+        desarrollo: { emoji: '🛠', label: 'En Desarrollo', color: '#FCD34D', dotColor: '#F59E0B' },
+        proximo: { emoji: '📅', label: 'Próximo', color: '#93C5FD', dotColor: '#60A5FA' },
+      };
+      const grouped = {};
+      DATA.roadmap.filter(r => r.vigente).forEach(r => {
+        if(!grouped[r.status]) grouped[r.status] = [];
+        grouped[r.status].push(r);
+      });
+      const html = Object.keys(statusMap).map(status => {
+        const items = grouped[status] || [];
+        if(items.length === 0) return '';
+        const info = statusMap[status];
+        return `<div>
+          <div class="rm-group-title">
+            <div class="rm-dot" style="background:${info.dotColor};"></div>
+            ${info.emoji} ${info.label}
+          </div>
+          ${items.map(r => `<div class="rm-card">
+            <div class="rm-dot" style="background:${info.dotColor};"></div>
+            <div class="rm-content">
+              <div class="rm-feature">${r.feature}</div>
+              <span class="pill-${status}">${r.product}</span>
+              <div style="font-size:12px;color:var(--muted);margin-top:6px;">${r.description}</div>
+              <div class="rm-date">📅 ${r.expectedDate}</div>
+            </div>
+            ${isAdmin ? `<button class="btn" style="padding:3px 8px;font-size:11px;" onclick="openRoadmapModal(${r.id})">Editar</button>` : ''}
+          </div>`).join('')}
+        </div>`;
+      }).join('');
+      document.getElementById('list-roadmap').innerHTML = html;
+    }
+
+    function openNewsModal(type, id) {
+      if(id) {
+        const list = type === 'com' ? DATA.novedadesCom : DATA.novedadesProd;
+        const item = list.find(n => n.id === id);
+        document.getElementById('news-emoji').value = item.emoji;
+        document.getElementById('news-tag').value = item.tag;
+        document.getElementById('news-tagColor').value = item.tagColor;
+        document.getElementById('news-title').value = item.title;
+        document.getElementById('news-content').value = item.content;
+        document.getElementById('news-date').value = item.date;
+        document.getElementById('news-vigente').checked = item.vigente;
+        document.getElementById('news-destacado').checked = item.destacado;
+        document.getElementById('delete-news-btn').style.display = 'block';
+      } else {
+        document.getElementById('news-emoji').value = '';
+        document.getElementById('news-tag').value = '';
+        document.getElementById('news-tagColor').value = 'purple';
+        document.getElementById('news-title').value = '';
+        document.getElementById('news-content').value = '';
+        document.getElementById('news-date').value = '';
+        document.getElementById('news-vigente').checked = true;
+        document.getElementById('news-destacado').checked = false;
+        document.getElementById('delete-news-btn').style.display = 'none';
+      }
+      currentEditType = type;
+      currentEditId = id;
+      openModal('modal-news');
+    }
+
+    function saveNews() {
+      const list = currentEditType === 'com' ? DATA.novedadesCom : DATA.novedadesProd;
+      const data = {
+        emoji: document.getElementById('news-emoji').value,
+        tag: document.getElementById('news-tag').value,
+        tagColor: document.getElementById('news-tagColor').value,
+        title: document.getElementById('news-title').value,
+        content: document.getElementById('news-content').value,
+        date: document.getElementById('news-date').value,
+        vigente: document.getElementById('news-vigente').checked,
+        destacado: document.getElementById('news-destacado').checked,
+      };
+      if(currentEditId) {
+        const item = list.find(n => n.id === currentEditId);
+        Object.assign(item, data);
+      } else {
+        data.id = Math.max(...list.map(n => n.id), 0) + 1;
+        list.push(data);
+      }
+      saveData();
+      closeModal('modal-news');
+      renderAll();
+    }
+
+    function deleteNews() {
+      const list = currentEditType === 'com' ? DATA.novedadesCom : DATA.novedadesProd;
+      const idx = list.findIndex(n => n.id === currentEditId);
+      if(idx >= 0) list.splice(idx, 1);
+      saveData();
+      closeModal('modal-news');
+      renderAll();
+    }
+
+    function toggleDestacado(type, id) {
+      const list = type === 'com' ? DATA.novedadesCom : DATA.novedadesProd;
+      const item = list.find(n => n.id === id);
+      if(item) item.destacado = !item.destacado;
+      saveData();
+      renderAll();
+    }
+
+    function openCatalogModal(id) {
+      if(id) {
+        const item = DATA.catalogo.find(c => c.id === id);
+        document.getElementById('cat-name').value = item.name;
+        document.getElementById('cat-desc').value = item.desc;
+        document.getElementById('cat-price').value = item.price;
+        document.getElementById('cat-vigente').checked = item.vigente;
+        document.getElementById('delete-cat-btn').style.display = 'block';
+      } else {
+        document.getElementById('cat-name').value = '';
+        document.getElementById('cat-desc').value = '';
+        document.getElementById('cat-price').value = '';
+        document.getElementById('cat-vigente').checked = true;
+        document.getElementById('delete-cat-btn').style.display = 'none';
+      }
+      currentEditId = id;
+      openModal('modal-catalog');
+    }
+
+    function saveCatalog() {
+      const data = {
+        name: document.getElementById('cat-name').value,
+        desc: document.getElementById('cat-desc').value,
+        price: document.getElementById('cat-price').value,
+        vigente: document.getElementById('cat-vigente').checked,
+      };
+      if(currentEditId) {
+        const item = DATA.catalogo.find(c => c.id === currentEditId);
+        Object.assign(item, data);
+      } else {
+        data.id = Math.max(...DATA.catalogo.map(c => c.id), 0) + 1;
+        DATA.catalogo.push(data);
+      }
+      saveData();
+      closeModal('modal-catalog');
+      renderAll();
+    }
+
+    function deleteCatalog() {
+      const idx = DATA.catalogo.findIndex(c => c.id === currentEditId);
+      if(idx >= 0) DATA.catalogo.splice(idx, 1);
+      saveData();
+      closeModal('modal-catalog');
+      renderAll();
+    }
+
+    function switchC2RTab(btn, tab) {
+      document.querySelectorAll('.c2r-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.c2r-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('c2r-' + tab).classList.add('active');
+    }
+
+    function switchObjTab(btn, prod) {
+      document.querySelectorAll('.obj-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.obj-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('obj-' + prod).classList.add('active');
+    }
+
+    function openObjModal(id) {
+      if(id) {
+        const item = DATA.objeciones.find(o => o.id === id);
+        document.getElementById('obj-product').value = item.product;
+        document.getElementById('obj-objection').value = item.objection;
+        document.getElementById('obj-response').value = item.response;
+        document.getElementById('obj-vigente').checked = item.vigente;
+        document.getElementById('delete-obj-btn').style.display = 'block';
+      } else {
+        document.getElementById('obj-product').value = 'General';
+        document.getElementById('obj-objection').value = '';
+        document.getElementById('obj-response').value = '';
+        document.getElementById('obj-vigente').checked = true;
+        document.getElementById('delete-obj-btn').style.display = 'none';
+      }
+      currentEditId = id;
+      openModal('modal-obj');
+    }
+
+    function saveObj() {
+      const data = {
+        product: document.getElementById('obj-product').value,
+        objection: document.getElementById('obj-objection').value,
+        response: document.getElementById('obj-response').value,
+        vigente: document.getElementById('obj-vigente').checked,
+      };
+      if(currentEditId) {
+        const item = DATA.objeciones.find(o => o.id === currentEditId);
+        Object.assign(item, data);
+      } else {
+        data.id = Math.max(...DATA.objeciones.map(o => o.id), 0) + 1;
+        DATA.objeciones.push(data);
+      }
+      saveData();
+      closeModal('modal-obj');
+      renderAll();
+    }
+
+    function deleteObj(id) {
+      const idx = DATA.objeciones.findIndex(o => o.id === id);
+      if(idx >= 0) DATA.objeciones.splice(idx, 1);
+      saveData();
+      renderAll();
+    }
+
+    function openDemoModal(id) {
+      if(id) {
+        const item = DATA.demos.find(d => d.id === id);
+        document.getElementById('demo-product').value = item.product;
+        document.getElementById('demo-icon').value = item.icon;
+        document.getElementById('demo-title').value = item.title;
+        document.getElementById('demo-useCase').value = item.useCase;
+        document.getElementById('demo-clientProfile').value = item.clientProfile;
+        document.getElementById('demo-link').value = item.link;
+        document.getElementById('demo-vigente').checked = item.vigente;
+        document.getElementById('delete-demo-btn').style.display = 'block';
+      } else {
+        document.getElementById('demo-product').value = '';
+        document.getElementById('demo-icon').value = '';
+        document.getElementById('demo-title').value = '';
+        document.getElementById('demo-useCase').value = '';
+        document.getElementById('demo-clientProfile').value = '';
+        document.getElementById('demo-link').value = '';
+        document.getElementById('demo-vigente').checked = true;
+        document.getElementById('delete-demo-btn').style.display = 'none';
+      }
+      currentEditId = id;
+      openModal('modal-demo');
+    }
+
+    function saveDemo() {
+      const data = {
+        product: document.getElementById('demo-product').value,
+        icon: document.getElementById('demo-icon').value,
+        title: document.getElementById('demo-title').value,
+        useCase: document.getElementById('demo-useCase').value,
+        clientProfile: document.getElementById('demo-clientProfile').value,
+        link: document.getElementById('demo-link').value,
+        vigente: document.getElementById('demo-vigente').checked,
+      };
+      if(currentEditId) {
+        const item = DATA.demos.find(d => d.id === currentEditId);
+        Object.assign(item, data);
+      } else {
+        data.id = Math.max(...DATA.demos.map(d => d.id), 0) + 1;
+        DATA.demos.push(data);
+      }
+      saveData();
+      closeModal('modal-demo');
+      renderAll();
+    }
+
+    function deleteDemo() {
+      const idx = DATA.demos.findIndex(d => d.id === currentEditId);
+      if(idx >= 0) DATA.demos.splice(idx, 1);
+      saveData();
+      closeModal('modal-demo');
+      renderAll();
+    }
+
+    function openRoadmapModal(id) {
+      if(id) {
+        const item = DATA.roadmap.find(r => r.id === id);
+        document.getElementById('rm-feature').value = item.feature;
+        document.getElementById('rm-product').value = item.product;
+        document.getElementById('rm-status').value = item.status;
+        document.getElementById('rm-date').value = item.expectedDate;
+        document.getElementById('rm-desc').value = item.description;
+        document.getElementById('rm-vigente').checked = item.vigente;
+        document.getElementById('delete-rm-btn').style.display = 'block';
+      } else {
+        document.getElementById('rm-feature').value = '';
+        document.getElementById('rm-product').value = '';
+        document.getElementById('rm-status').value = 'desarrollo';
+        document.getElementById('rm-date').value = '';
+        document.getElementById('rm-desc').value = '';
+        document.getElementById('rm-vigente').checked = true;
+        document.getElementById('delete-rm-btn').style.display = 'none';
+      }
+      currentEditId = id;
+      openModal('modal-roadmap');
+    }
+
+    function saveRoadmap() {
+      const data = {
+        feature: document.getElementById('rm-feature').value,
+        product: document.getElementById('rm-product').value,
+        status: document.getElementById('rm-status').value,
+        expectedDate: document.getElementById('rm-date').value,
+        description: document.getElementById('rm-desc').value,
+        vigente: document.getElementById('rm-vigente').checked,
+      };
+      if(currentEditId) {
+        const item = DATA.roadmap.find(r => r.id === currentEditId);
+        Object.assign(item, data);
+      } else {
+        data.id = Math.max(...DATA.roadmap.map(r => r.id), 0) + 1;
+        DATA.roadmap.push(data);
+      }
+      saveData();
+      closeModal('modal-roadmap');
+      renderAll();
+    }
+
+    function deleteRoadmap() {
+      const idx = DATA.roadmap.findIndex(r => r.id === currentEditId);
+      if(idx >= 0) DATA.roadmap.splice(idx, 1);
+      saveData();
+      closeModal('modal-roadmap');
+      renderAll();
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    function rteCmd(cmd) {
+      document.execCommand(cmd);
+      document.getElementById('obj-response').focus();
+    }
+
+    function insertEmoji(elId) {
+      const emojis = ['😊', '👍', '✅', '⚡', '🎯', '📈', '💡', '🚀'];
+      let emojiStr = prompt('Elige un emoji: ' + emojis.join(' '));
+      if(emojiStr) {
+        const el = document.getElementById(elId);
+        el.value += ' ' + emojiStr + ' ';
+        el.focus();
+      }
+    }
+
+    function searchAll(q) {
+      if(!q.trim()) return [];
+      const q2 = q.toLowerCase();
+      const strip = s => s.replace(/<[^>]+>/g, '');
+      const snip = s => strip(s).slice(0, 50);
+      const results = [];
+      DATA.novedadesCom.forEach(n => {
+        if((n.title + strip(n.content)).toLowerCase().includes(q2))
+          results.push({section:'novedades-com', label:'📣 Comercial', title:n.title, snippet:snip(n.content)});
+      });
+      DATA.novedadesProd.forEach(n => {
+        if((n.title + strip(n.content)).toLowerCase().includes(q2))
+          results.push({section:'novedades-prod', label:'🆕 Producto', title:n.title, snippet:snip(n.content)});
+      });
+      DATA.catalogo.forEach(c => {
+        if((c.name + c.desc).toLowerCase().includes(q2))
+          results.push({section:'catalogo', label:'📦 Catálogo', title:c.name, snippet:snip(c.desc)});
+      });
+      ['contactabilidad','campanias','beneficios'].forEach(tab => {
+        (DATA.c2r[tab]||[]).forEach(i => {
+          if((i.title + strip(i.content)).toLowerCase().includes(q2))
+            results.push({section:'c2r', label:'🎯 C2R', title:i.title, snippet:snip(i.content)});
+        });
+      });
+      (DATA.objeciones||[]).forEach(o => {
+        if((o.objection + o.response).toLowerCase().includes(q2))
+          results.push({section:'objeciones', label:'💬 Objeciones', title:o.objection.slice(0,60), snippet:o.response.slice(0,50)});
+      });
+      (DATA.demos||[]).forEach(d => {
+        if((d.title + d.useCase).toLowerCase().includes(q2))
+          results.push({section:'demos', label:'🎬 Demos', title:d.title, snippet:d.useCase.slice(0,50)});
+      });
+      (DATA.roadmap||[]).forEach(r => {
+        if((r.feature + r.description).toLowerCase().includes(q2))
+          results.push({section:'roadmap', label:'🗺️ Roadmap', title:r.feature, snippet:r.description.slice(0,50)});
+      });
+      return results.slice(0, 10);
+    }
+
+    let searchOpen = false;
+    function toggleSearch() {
+      searchOpen = !searchOpen;
+      document.getElementById('search-input-wrap').classList.toggle('open', searchOpen);
+      document.getElementById('search-inp').classList.toggle('open', searchOpen);
+      if(searchOpen) { setTimeout(()=>document.getElementById('search-inp').focus(), 200); }
+      else { closeSearch(); }
+    }
+
+    function closeSearch() {
+      searchOpen = false;
+      document.getElementById('search-input-wrap').classList.remove('open');
+      document.getElementById('search-inp').classList.remove('open');
+      document.getElementById('search-inp').value = '';
+      document.getElementById('search-results').classList.remove('open');
+    }
+
+    function onSearch(val) {
+      const res = document.getElementById('search-results');
+      if(!val.trim()) { res.classList.remove('open'); return; }
+      const items = searchAll(val);
+      if(items.length===0) {
+        res.innerHTML='<div class="sr-empty">No hay resultados para "'+val+'"</div>';
+      } else {
+        res.innerHTML = items.map(i=>`<div class="sr-item" onclick="goTo('${i.section}');closeSearch()">
+          <div style="flex-shrink:0;font-size:14px">${i.label.split(' ')[0]}</div>
+          <div style="flex:1;min-width:0">
+            <div class="sr-type">${i.label}</div>
+            <div class="sr-title">${i.title}</div>
+            ${i.snippet?`<div class="sr-snippet">${i.snippet}…</div>`:''}
+          </div>
+        </div>`).join('');
+      }
+      res.classList.add('open');
+    }
+
+    document.addEventListener('click', e => {
+      if(searchOpen && !document.getElementById('search-wrap').contains(e.target)) closeSearch();
+    });
+
+    async function init() {
+      await loadData();
+      updateTopBarDate();
+      try {
+        const stored = localStorage.getItem('picallex_read_v1');
+        if(stored) READ_ITEMS = new Set(JSON.parse(stored));
+      } catch(e){}
+      document.querySelectorAll('.admin-only').forEach(el=>el.style.display='none');
+      renderAll();
+      updateUnreadDots();
+    }
+
+    init();
+  </script>
+</body>
+</html>

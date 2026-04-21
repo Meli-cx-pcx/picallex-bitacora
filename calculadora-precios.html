@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Precios - PicallEx</title>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background-color: #07071C;
+            color: #EDE9FE;
+            line-height: 1.6;
+        }
+
+        /* Topbar */
+        .topbar {
+            background-color: #111132;
+            border-bottom: 1px solid rgba(167, 139, 250, 0.14);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: transparent;
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            color: #A78BFA;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: rgba(167, 139, 250, 0.1);
+            border-color: rgba(167, 139, 250, 0.5);
+        }
+
+        .topbar h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #A78BFA;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            gap: 0;
+            background-color: #111132;
+            border-bottom: 1px solid rgba(167, 139, 250, 0.14);
+            overflow-x: auto;
+            padding: 0 2rem;
+        }
+
+        .tab-button {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: #7C6FAD;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-family: 'Raleway', sans-serif;
+            white-space: nowrap;
+        }
+
+        .tab-button:hover {
+            color: #A78BFA;
+        }
+
+        .tab-button.active {
+            color: #A78BFA;
+            border-bottom-color: #7C3AED;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #EDE9FE;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: rgba(167, 139, 250, 0.08);
+            border: 1px solid rgba(167, 139, 250, 0.14);
+            color: #EDE9FE;
+            border-radius: 6px;
+            font-family: 'Raleway', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #7C3AED;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        input[type="number"]::placeholder,
+        input[type="text"]::placeholder {
+            color: #7C6FAD;
+        }
+
+        /* Checkbox */
+        .checkbox-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #7C3AED;
+        }
+
+        /* Button Styles */
+        .button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Raleway', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .button-primary {
+            background-color: #7C3AED;
+            color: #EDE9FE;
+        }
+
+        .button-primary:hover {
+            background-color: #6D28D9;
+            transform: translateY(-2px);
+        }
+
+        .button-secondary {
+            background-color: transparent;
+            color: #A78BFA;
+            border: 1px solid rgba(167, 139, 250, 0.3);
+        }
+
+        .button-secondary:hover {
+            background-color: rgba(167, 139, 250, 0.1);
+            border-color: rgba(167, 139, 250, 0.5);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* Plans Grid */
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .plan-card {
+            background-color: #111132;
+            border: 1px solid rgba(167, 139, 250, 0.14);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .plan-card:hover {
+            border-color: rgba(167, 139, 250, 0.3);
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+        }
+
+        .plan-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #A78BFA;
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #7C3AED;
+            margin-bottom: 1rem;
+        }
+
+        .plan-price span {
+            font-size: 0.8rem;
+            color: #7C6FAD;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 1rem;
+        }
+
+        .plan-features li {
+            padding: 0.5rem 0;
+            color: #EDE9FE;
+            border-bottom: 1px solid rgba(167, 139, 250, 0.08);
+        }
+
+        .plan-features li:last-child {
+            border-bottom: none;
+        }
+
+        .plan-inputs {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(167, 139, 250, 0.14);
+        }
+
+        .plan-total {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.2) 0%, rgba(167, 139, 250, 0.1) 100%);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .plan-total-label {
+            font-size: 0.85rem;
+            color: #7C6FAD;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .plan-total-price {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #A78BFA;
+        }
+
+        /* Transactional Sections */
+        .service-section {
+            background-color: #111132;
+            border: 1px solid rgba(167, 139, 250, 0.14);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .service-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #A78BFA;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .service-subtitle {
+            font-size: 0.85rem;
+            color: #7C6FAD;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Tier Selection */
+        .tier-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .tier-button {
+            padding: 0.75rem;
+            background-color: rgba(167, 139, 250, 0.08);
+            border: 2px solid rgba(167, 139, 250, 0.14);
+            color: #EDE9FE;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .tier-button:hover {
+            border-color: rgba(167, 139, 250, 0.3);
+        }
+
+        .tier-button.selected {
+            background-color: #7C3AED;
+            border-color: #7C3AED;
+            color: #EDE9FE;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+        }
+
+        .comparison-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(167, 139, 250, 0.14);
+        }
+
+        .comparison-table .legacy-col {
+            background-color: rgba(167, 139, 250, 0.05);
+        }
+
+        .comparison-table .nueva-col {
+            background-color: rgba(167, 139, 250, 0.08);
+        }
+
+        .traffic-light {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .traffic-light.green {
+            background-color: #10b981;
+        }
+
+        .traffic-light.yellow {
+            background-color: #f59e0b;
+        }
+
+        .traffic-light.red {
+            background-color: #ef4444;
+        }
+
+        /* Admin Section */
+        .admin-section {
+            background-color: #111132;
+            border: 2px solid rgba(167, 139, 250, 0.14);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .admin-password-prompt {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+            margin-bottom: 2rem;
+        }
+
+        .admin-password-prompt input {
+            flex: 0 1 250px;
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .admin-subsection {
+            background-color: rgba(167, 139, 250, 0.05);
+            border: 1px solid rgba(167, 139, 250, 0.1);
+            border-radius: 6px;
+            padding: 1.5rem;
+        }
+
+        .admin-subsection h3 {
+            color: #A78BFA;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .admin-field {
+            margin-bottom: 1rem;
+        }
+
+        .admin-field label {
+            font-size: 0.85rem;
+            color: #7C6FAD;
+        }
+
+        /* Output Box */
+        .output-box {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(167, 139, 250, 0.08) 100%);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .output-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(167, 139, 250, 0.1);
+        }
+
+        .output-row:last-child {
+            border-bottom: none;
+        }
+
+        .output-label {
+            color: #7C6FAD;
+            font-size: 0.9rem;
+        }
+
+        .output-value {
+            color: #EDE9FE;
+            font-weight: 600;
+        }
+
+        .output-total {
+            padding: 1rem 0;
+            border-top: 2px solid rgba(167, 139, 250, 0.2);
+            margin-top: 1rem;
+        }
+
+        .output-total-label {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #A78BFA;
+        }
+
+        .output-total-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #7C3AED;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .topbar {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .topbar h1 {
+                font-size: 1.2rem;
+            }
+
+            .tab-nav {
+                padding: 0 1rem;
+            }
+
+            .plans-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .button {
+                width: 100%;
+            }
+
+            .comparison-table {
+                font-size: 0.9rem;
+            }
+
+            .comparison-table td {
+                padding: 0.75rem;
+            }
+
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .topbar,
+            .tab-nav,
+            .admin-section,
+            .button-group {
+                display: none !important;
+            }
+
+            body {
+                background-color: white;
+                color: black;
+            }
+
+            .plan-card,
+            .service-section,
+            .output-box {
+                background-color: white;
+                border: 1px solid #ccc;
+                color: black;
+            }
+        }
+
+        /* Hidden class */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Topbar -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <a href="index.html" class="back-button">← Volver a Bitácora</a>
+            <h1>Calculadora de Precios</h1>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-nav">
+        <button class="tab-button active" onclick="switchTab(0)">Nueva Oferta</button>
+        <button class="tab-button" onclick="switchTab(1)">Oferta Legacy</button>
+        <button class="tab-button" onclick="switchTab(2)">Transaccional</button>
+        <button class="tab-button" onclick="switchTab(3)">Migración</button>
+        <button class="tab-button" onclick="switchTab(4)">⚙️ Admin Precios</button>
+    </div>
+
+    <div class="container">
+        <!-- TAB 0: Nueva Oferta -->
+        <div class="tab-content active" id="tab-0">
+            <h2 style="color: #A78BFA; margin-bottom: 1.5rem; font-size: 1.5rem;">Nueva Oferta</h2>
+
+            <div class="plans-grid">
+                <!-- Lite Plan -->
+                <div class="plan-card">
+                    <div class="plan-name">Lite</div>
+                    <div class="plan-price">$99<span>/mes</span></div>
+                    <ul class="plan-features">
+                        <li>✓ 1 Usuario incluido</li>
+                        <li>✓ 1 PBX incluido</li>
+                        <li>✓ Soporte por email</li>
+                    </ul>
+                    <div class="plan-inputs">
+                        <div class="form-group">
+                            <label>Usuarios adicionales</label>
+                            <input type="number" id="nueva-lite-users" value="0" min="0" placeholder="0">
+                            <small style="color: #7C6FAD;">Extra: $10 c/u</small>
+                        </div>
+                        <div class="form-group">
+                            <label>PBX adicional (líneas)</label>
+                            <input type="number" id="nueva-lite-pbx" value="0" min="0" placeholder="0">
+                            <small style="color: #7C6FAD;">Extra: $20 c/u</small>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="checkbox" id="nueva-lite-wa"> WA Business (+$25)
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="checkbox" id="nueva-lite-chatdial"> ChatDial (+$15)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="plan-total">
+                        <div class="plan-total-label">Total Mensual</div>
+                        <div class="plan-total-price" id="nueva-lite-total">$99</div>
+                    </div>
+                </div>
+
+                <!-- Starter Plan -->
+                <div class="plan-card">
+                    <div class="plan-name">Starter</div>
+                    <div class="plan-price">$149<span>/mes</span></div>
+                    <ul class="plan-features">
+                        <li>✓ 3 Usuarios incluidos</li>
+                        <li>✓ 2 PBX incluidos</li>
+                        <li>✓ Soporte por chat</li>
+                    </ul>
+                    <div class="plan-inputs">
+                        <div class="form-group">
+                            <label>Usuarios adicionales</label>
+                            <input type="number" id="nueva-starter-users" value="0" min="0" placeholder="0">
+                            <small style="color: #7C6FAD;">Extra: $10 c/u</small>
+                        </div>
+                        <div class="form-group">
+                            <label>PBX adicional (líneas)</label>
+                            <input type="number" id="nueva-starter-pbx" value="0" min="0" placeholder="0">
+                            <small style="color: #7C6FAD;">Extra: $20 c/u</small>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="checkbox" id="nueva-starter-wa"> WA Business (+$25)
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="checkbox" id="nueva-starter-chatdial"> ChatDial (+$15)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="plan-total">
+                        <div class="plan-total-label">Total Mensual</div>
+                        <div class="plan-total-price" id="nueva-starter-total">$149</div>
+                    </div>
+                </div>
+
+                <!-- Team Plan -->
+                <div class="plan-card">
+                    <div class="plan-name">Team</div>
+                    <div class="plan-price">$299<span>/mes</span></div>
+                    <ul class="plan-features">
+                        <li>✓ 8 Usuarios incluidos</li>
+                        <li>✓ 4 PBX incluidos</li>
+                        <li>✓ Soporte por teléfono</li>
+                    </ul>
+                    <div class="plan-inputs">
+                        <div class="form-group">
+                            <label>Usuarios adicionales</label>
+                            <input type="number" id="nueva-team-users" value="0" min="0" placeholder="0">
+                            <small style="color: #7C6FAD;">Extra: $8 c/u</small>
+                        </div>
+                        <div class="form-group">
+                            <label>PBX adicional (líneas)</label>
+                            <input type="number" id="nueva-team-pbx" value="0" min="0" placeholder="0">
+                            <small style="color: #7C6FAD;">Extra: $20 c/u</small>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="checkbox" id="nueva-team-wa"> WA Business (+$25)
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="checkbox" id="nueva-team-chatdial"> ChatDial (+$15)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="plan-total">
+                        <div class="plan-total-label">Total Mensual</div>
+                        <div class="plan-total-price" id="nueva-team-total">$299</div>
+                    </div>
+                </div>
+
+                <!-- Business Plan -->
+                <div class="plan-card">
+                    <div class="plan-name">Business</div>
+                    <div class="plan-price">$499<span>/mes</span></div>
+                    <ul class="plan-features">
+                        <li>✓ 20 Usuarios incluidos</li>
+                        <li>✓ 8 PBX incluidos</li>
+                        <li>✓ Gestor de cuenta</li>
+                    </ul>
+                    <div class="plan-inputs">
+                        <div class="form-group">
+                            <label>Usuarios adicionales</label>
+                            <input type="number" id="nueva-business-users" value="0" min="0" placeholder="0">
+                            <small style="color: #7C6FAD;">Extra: $6 c/u</small>
+                        </div>
+                        <div class="form-group">
+                            <label>PBX adicional (líneas)</label>
+                            <input type="number" id="nueva-business-pbx" value="0" min="0" placeholder="0">
+                            <small style="color: #7C6FAD;">Extra: $20 c/u</small>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="checkbox" id="nueva-business-wa"> WA Business (+$25)
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="checkbox" id="nueva-business-chatdial"> ChatDial (+$15)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="plan-total">
+                        <div class="plan-total-label">Total Mensual</div>
+                        <div class="plan-total-price" id="nueva-business-total">$499</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="button button-secondary" onclick="clearTab('nueva')">Limpiar</button>
+            </div>
+        </div>
+
+        <!-- TAB 1: Oferta Legacy -->
+        <div class="tab-content" id="tab-1">
+            <h2 style="color: #A78BFA; margin-bottom: 1.5rem; font-size: 1.5rem;">Oferta Legacy</h2>
+
+            <div class="plans-grid">
+                <!-- Lite Plan Legacy -->
+                <div class="plan-card">
+                    <div class="plan-name">Lite</div>
+                    <div class="plan-price">$79<span>/mes</span></div>
+                    <ul class="plan-features">
+                        <li>✓ 1 Usuario incluido</li>
+                        <li>✓ 1 PBX incluido</li>
+                        <li>✓ Soporte por email</li>
+                    </ul>
+                    <div class="plan-inputs">
+                        <div class="form-group">
+                            <label>Usuarios adicionales</label>
+                            <input type="number" id="legacy-lite-users" value="0" min="0" placeholder="0">
+                            <small style="color: #7C6FAD;">Extra: $12 c/u</small>
+                        </div>
+                        <div class="form-group">
+                            <label>PBX adicional (líneas)</label>
+                            <input type="number" id="legacy-lite-pbx" value="0" min="0" placeholder="0">
+                            <small style="color: #7C6FAD;">Extra: $25 c/u</small>
+                        </div>
+                    </div>
+                    <div class="plan-total">
+                        <div class="plan-total-label">Total Mensual</div>
+                        <div class="plan-total-price" id="legacy-lite-total">$79</div>
+                    </div>
+                </div>
+
+                <!-- Starter Plan Legacy -->
+                <div class="plan-card">
+                    <div class="plan-name">Starter</div>
+                    <div class="plan-price">$119<span>/mes</span></div>
+                    <ul class="plan-features">
+                        <li>✓ 3 Usuarios incluidos</li>
+                        <li>✓ 2 PBX incluidos</li>
+                        <li>✓ Soporte por chat</li>
+                    </ul>
+                    <div class="plan-inputs">
+                        <div class="form-group">
+                            <label>Usuarios adicionales</label>
+                            <input type="number" id="legacy-starter-users" value="0" min="0" placeholder="0">
+                            <small style="color: #7C6FAD;">Extra: $12 c/u</small>
+                        </div>
+                        <div class="form-group">
+                            <label>PBX adicional (líneas)</label>
+                            <input type="number" id="legacy-starter-pbx" value="0" min="0" placeholder="0">
+                            <small style="color: #7C6FAD;">Extra: $25 c/u</small>
+                        </div>
+                    </div>
+                    <div class="plan-total">
+                        <div class="plan-total-label">Total Mensual</div>
+                        <div class="plan-total-price" id="legacy-starter-total">$119</div>
+                    </div>
+                </div>
+
+                <!-- Team Plan Legacy -->
+                <div class="plan-card">
+                    <div class="plan-name">Team</div>
+                    <div class="plan-price">$249<span>/mes</span></div>
+                    <ul class="plan-features">
+                        <li>✓ 8 Usuarios incluidos</li>
+                        <li>✓ 4 PBX incluidos</li>
+                        <li>✓ Soporte por teléfono</li>
+                    </ul>
+                    <div class="plan-inputs">
+                        <div class="form-group">
+                            <label>Usuarios adicionales</label>
+                            <input type="number" id="legacy-team-users" value="0" min="0" placeholder="0">
+                            <small style="color: #7C6FAD;">Extra: $10 c/u</small>
+                        </div>
+                        <div class="form-group">
+                            <label>PBX adicional (líneas)</label>
+                            <input type="number" id="legacy-team-pbx" value="0" min="0" placeholder="0">
+                            <small style="color: #7C6FAD;">Extra: $25 c/u</small>
+                        </div>
+                    </div>
+                    <div class="plan-total">
+                        <div class="plan-total-label">Total Mensual</div>
+                        <div class="plan-total-price" id="legacy-team-total">$249</div>
+                    </div>
+                </div>
+
+                <!-- Business Plan Legacy -->
+                <div class="plan-card">
+                    <div class="plan-name">Business</div>
+                    <div class="plan-price">$449<span>/mes</span></div>
+                    <ul class="plan-features">
+                        <li>✓ 20 Usuarios incluidos</li>
+                        <li>✓ 8 PBX incluidos</li>
+                        <li>✓ Gestor de cuenta</li>
+                    </ul>
+                    <div class="plan-inputs">
+                        <div class="form-group">
+                            <label>Usuarios adicionales</label>
+                            <input type="number" id="legacy-business-users" value="0" min="0" placeholder="0">
+                            <small style="color: #7C6FAD;">Extra: $8 c/u</small>
+                        </div>
+                        <div class="form-group">
+                            <label>PBX adicional (líneas)</label>
+                            <input type="number" id="legacy-business-pbx" value="0" min="0" placeholder="0">
+                            <small style="color: #7C6FAD;">Extra: $25 c/u</small>
+                        </div>
+                    </div>
+                    <div class="plan-total">
+                        <div class="plan-total-label">Total Mensual</div>
+                        <div class="plan-total-price" id="legacy-business-total">$449</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="button button-secondary" onclick="clearTab('legacy')">Limpiar</button>
+            </div>
+        </div>
+
+        <!-- TAB 2: Transaccional -->
+        <div class="tab-content" id="tab-2">
+            <h2 style="color: #A78BFA; margin-bottom: 1.5rem; font-size: 1.5rem;">Servicios Transaccionales</h2>
+
+            <!-- ChatBot Section -->
+            <div class="service-section">
+                <div class="service-title">🤖 ChatBot</div>
+                <div class="service-subtitle">Vigente desde 16-Mar-2026</div>
+
+                <div class="form-group">
+                    <label>Conversaciones mensuales esperadas</label>
+                    <input type="number" id="chatbot-conversations" value="0" min="0" placeholder="Ej: 3000">
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="margin-bottom: 0.5rem;">Tier seleccionado automáticamente:</label>
+                    <div class="tier-selection">
+                        <div class="tier-button" id="chatbot-tier1">Tier 1: $0.10/conv</div>
+                        <div class="tier-button" id="chatbot-tier2">Tier 2: $0.08/conv</div>
+                        <div class="tier-button" id="chatbot-tier3">Tier 3: $0.06/conv</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Workflows adicionales (incluye N según tier)</label>
+                    <input type="number" id="chatbot-extra-wf" value="0" min="0" placeholder="Adicionales a los incluidos">
+                    <small style="color: #7C6FAD;">Extra: $50/mes c/u</small>
+                </div>
+
+                <div class="output-box">
+                    <div class="output-row">
+                        <span class="output-label">Tier aplicado:</span>
+                        <span class="output-value" id="chatbot-tier-display">Tier 1</span>
+                    </div>
+                    <div class="output-row">
+                        <span class="output-label">Conversaciones incluidas:</span>
+                        <span class="output-value" id="chatbot-included-conv">0</span>
+                    </div>
+                    <div class="output-row">
+                        <span class="output-label">Costo conversaciones:</span>
+                        <span class="output-value" id="chatbot-conv-cost">$0</span>
+                    </div>
+                    <div class="output-row">
+                        <span class="output-label">Workflows incluidos:</span>
+                        <span class="output-value" id="chatbot-included-wf">1</span>
+                    </div>
+                    <div class="output-row">
+                        <span class="output-label">Costo workflows adicionales:</span>
+                        <span class="output-value" id="chatbot-extra-wf-cost">$0</span>
+                    </div>
+                    <div class="output-total">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="output-total-label">Total Mensual ChatBot</div>
+                            <div class="output-total-value" id="chatbot-total">$50</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="button button-secondary" onclick="clearService('chatbot')" style="margin-top: 1rem;">Limpiar</button>
+            </div>
+
+            <!-- Dialer Section -->
+            <div class="service-section">
+                <div class="service-title">📞 Dialer</div>
+
+                <div class="form-group">
+                    <label>Llamadas concurrentes necesarias</label>
+                    <input type="number" id="dialer-cc" value="0" min="0" placeholder="Ej: 25">
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="margin-bottom: 0.5rem;">Tiers disponibles:</label>
+                    <div class="tier-selection">
+                        <div class="tier-button" onclick="selectDialerTier(5)">5 CC<br>$49</div>
+                        <div class="tier-button" onclick="selectDialerTier(10)">10 CC<br>$89</div>
+                        <div class="tier-button" onclick="selectDialerTier(20)">20 CC<br>$159</div>
+                        <div class="tier-button" onclick="selectDialerTier(30)">30 CC<br>$219</div>
+                        <div class="tier-button" onclick="selectDialerTier(50)">50 CC<br>$329</div>
+                        <div class="tier-button" onclick="selectDialerTier(100)">100 CC<br>$549</div>
+                        <div class="tier-button" onclick="selectDialerTier(200)">200 CC<br>$899</div>
+                        <div class="tier-button" onclick="selectDialerTier(300)">300 CC<br>$1,199</div>
+                    </div>
+                </div>
+
+                <div class="output-box">
+                    <div class="output-row">
+                        <span class="output-label">Tier recomendado:</span>
+                        <span class="output-value" id="dialer-recommended">5 CC</span>
+                    </div>
+                    <div class="output-row">
+                        <span class="output-label">Precio mensual:</span>
+                        <span class="output-value" id="dialer-monthly">$0</span>
+                    </div>
+                    <div class="output-row">
+                        <span class="output-label">Activación (única):</span>
+                        <span class="output-value">$49</span>
+                    </div>
+                    <div class="output-total">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="output-total-label">Costo Total Dialer</div>
+                            <div class="output-total-value" id="dialer-total">$0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="button button-secondary" onclick="clearService('dialer')" style="margin-top: 1rem;">Limpiar</button>
+            </div>
+
+            <!-- WhatsApp Business Section -->
+            <div class="service-section">
+                <div class="service-title">💬 WhatsApp Business</div>
+
+                <div class="form-group">
+                    <label>Número de líneas</label>
+                    <input type="number" id="wa-lines" value="1" min="1" placeholder="1">
+                    <small style="color: #7C6FAD;">Base: $59 (1 línea + 3 usuarios). Extra: $25/línea</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Usuarios adicionales</label>
+                    <input type="number" id="wa-users" value="0" min="0" placeholder="0">
+                    <small style="color: #7C6FAD;">Extra: $10 por usuario</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Minutos WA Calling (saliente + entrante)</label>
+                    <input type="number" id="wa-minutes" value="0" min="0" placeholder="0">
+                    <small style="color: #7C6FAD;">Saliente: $0.04/min | Entrante: $0.02/min</small>
+                </div>
+
+                <div class="output-box">
+                    <div class="output-row">
+                        <span class="output-label">Base (1 línea + 3 usuarios):</span>
+                        <span class="output-value" id="wa-base">$59</span>
+                    </div>
+                    <div class="output-row">
+                        <span class="output-label">Líneas adicionales:</span>
+                        <span class="output-value" id="wa-extra-lines">$0</span>
+                    </div>
+                    <div class="output-row">
+                        <span class="output-label">Usuarios adicionales:</span>
+                        <span class="output-value" id="wa-extra-users">$0</span>
+                    </div>
+                    <div class="output-row">
+                        <span class="output-label">WA Calling:</span>
+                        <span class="output-value" id="wa-calling">$0</span>
+                    </div>
+                    <div class="output-total">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="output-total-label">Total Mensual WA</div>
+                            <div class="output-total-value" id="wa-total">$59</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="button button-secondary" onclick="clearService('wa')" style="margin-top: 1rem;">Limpiar</button>
+            </div>
+
+            <!-- Local Numbers Section -->
+            <div class="service-section">
+                <div class="service-title">🌐 Números Locales</div>
+
+                <div class="form-group">
+                    <label>Números locales USA</label>
+                    <input type="number" id="local-usa" value="0" min="0" placeholder="0">
+                    <small style="color: #7C6FAD;">$9.95/número/mes</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Números de otros países</label>
+                    <input type="number" id="local-other" value="0" min="0" placeholder="0">
+                    <small style="color: #7C6FAD;">Precio configurable en Admin</small>
+                </div>
+
+                <div class="output-box">
+                    <div class="output-row">
+                        <span class="output-label">USA:</span>
+                        <span class="output-value" id="local-usa-cost">$0</span>
+                    </div>
+                    <div class="output-row">
+                        <span class="output-label">Otros países:</span>
+                        <span class="output-value" id="local-other-cost">$0</span>
+                    </div>
+                    <div class="output-total">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="output-total-label">Total Mensual</div>
+                            <div class="output-total-value" id="local-total">$0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="button button-secondary" onclick="clearService('local')" style="margin-top: 1rem;">Limpiar</button>
+            </div>
+
+            <!-- Scan, Clean & Go Section -->
+            <div class="service-section">
+                <div class="service-title">🧹 Scan, Clean & Go</div>
+
+                <div class="form-group">
+                    <label>Total DIDs a validar</label>
+                    <input type="number" id="scg-dids" value="0" min="0" placeholder="0">
+                    <small style="color: #7C6FAD;">Precio por DID configurable en Admin (defecto: $0.005)</small>
+                </div>
+
+                <div class="output-box">
+                    <div class="output-row">
+                        <span class="output-label">DIDs:</span>
+                        <span class="output-value" id="scg-dids-count">0</span>
+                    </div>
+                    <div class="output-row">
+                        <span class="output-label">Precio por DID:</span>
+                        <span class="output-value" id="scg-price-per-did">$0.005</span>
+                    </div>
+                    <div class="output-total">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="output-total-label">Costo Estimado</div>
+                            <div class="output-total-value" id="scg-total">$0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="button button-secondary" onclick="clearService('scg')" style="margin-top: 1rem;">Limpiar</button>
+            </div>
+        </div>
+
+        <!-- TAB 3: Migración -->
+        <div class="tab-content" id="tab-3">
+            <h2 style="color: #A78BFA; margin-bottom: 1.5rem; font-size: 1.5rem;">Comparativa: Legacy vs Nueva Oferta</h2>
+
+            <div class="form-group">
+                <label>Selecciona un plan para comparar:</label>
+                <select id="migration-plan" onchange="updateMigration()">
+                    <option value="">-- Seleccionar plan --</option>
+                    <option value="lite">Lite</option>
+                    <option value="starter">Starter</option>
+                    <option value="team">Team</option>
+                    <option value="business">Business</option>
+                </select>
+            </div>
+
+            <div id="migration-comparison" style="margin-top: 2rem;"></div>
+
+            <div class="button-group">
+                <button class="button button-secondary" onclick="clearTab('migration')">Limpiar</button>
+            </div>
+        </div>
+
+        <!-- TAB 4: Admin Precios -->
+        <div class="tab-content" id="tab-4">
+            <h2 style="color: #A78BFA; margin-bottom: 1.5rem; font-size: 1.5rem;">⚙️ Admin Precios</h2>
+
+            <div class="admin-section">
+                <h3 style="color: #A78BFA; margin-bottom: 1.5rem;">🔒 Acceso Restringido</h3>
+
+                <div class="admin-password-prompt" id="admin-password-section">
+                    <input type="password" id="admin-password" placeholder="Ingresa contraseña para acceder">
+                    <button class="button button-primary" onclick="verifyAdminPassword()">Desbloquear</button>
+                </div>
+
+                <div id="admin-content" class="hidden">
+                    <div class="admin-grid">
+                        <!-- ChatBot Prices -->
+                        <div class="admin-subsection">
+                            <h3>ChatBot - Tier 1</h3>
+                            <div class="admin-field">
+                                <label>Rango conversaciones</label>
+                                <input type="text" id="admin-chatbot-tier1-range" value="0-2,000" disabled>
+                            </div>
+                            <div class="admin-field">
+                                <label>Precio por conversación</label>
+                                <input type="number" id="admin-chatbot-tier1-rate" step="0.01" value="0.10">
+                            </div>
+                            <div class="admin-field">
+                                <label>Mínimo mensual</label>
+                                <input type="number" id="admin-chatbot-tier1-min" value="50">
+                            </div>
+                            <div class="admin-field">
+                                <label>Workflows incluidos</label>
+                                <input type="number" id="admin-chatbot-tier1-wf" value="1">
+                            </div>
+                        </div>
+
+                        <div class="admin-subsection">
+                            <h3>ChatBot - Tier 2</h3>
+                            <div class="admin-field">
+                                <label>Rango conversaciones</label>
+                                <input type="text" id="admin-chatbot-tier2-range" value="2,001-5,000" disabled>
+                            </div>
+                            <div class="admin-field">
+                                <label>Precio por conversación</label>
+                                <input type="number" id="admin-chatbot-tier2-rate" step="0.01" value="0.08">
+                            </div>
+                            <div class="admin-field">
+                                <label>Mínimo mensual</label>
+                                <input type="number" id="admin-chatbot-tier2-min" value="200">
+                            </div>
+                            <div class="admin-field">
+                                <label>Workflows incluidos</label>
+                                <input type="number" id="admin-chatbot-tier2-wf" value="2">
+                            </div>
+                        </div>
+
+                        <div class="admin-subsection">
+                            <h3>ChatBot - Tier 3</h3>
+                            <div class="admin-field">
+                                <label>Rango conversaciones</label>
+                                <input type="text" id="admin-chatbot-tier3-range" value="5,001+" disabled>
+                            </div>
+                            <div class="admin-field">
+                                <label>Precio por conversación</label>
+                                <input type="number" id="admin-chatbot-tier3-rate" step="0.01" value="0.06">
+                            </div>
+                            <div class="admin-field">
+                                <label>Mínimo mensual</label>
+                                <input type="number" id="admin-chatbot-tier3-min" value="400">
+                            </div>
+                            <div class="admin-field">
+                                <label>Workflows incluidos</label>
+                                <input type="number" id="admin-chatbot-tier3-wf" value="5">
+                            </div>
+                        </div>
+
+                        <div class="admin-subsection">
+                            <h3>ChatBot - Workflow Adicional</h3>
+                            <div class="admin-field">
+                                <label>Precio por workflow extra</label>
+                                <input type="number" id="admin-chatbot-extra-wf-price" step="1" value="50">
+                            </div>
+                        </div>
+
+                        <!-- Dialer Prices -->
+                        <div class="admin-subsection">
+                            <h3>Dialer - Tier 5CC</h3>
+                            <div class="admin-field">
+                                <label>Precio mensual</label>
+                                <input type="number" id="admin-dialer-5" step="1" value="49">
+                            </div>
+                        </div>
+
+                        <div class="admin-subsection">
+                            <h3>Dialer - Tier 10CC</h3>
+                            <div class="admin-field">
+                                <label>Precio mensual</label>
+                                <input type="number" id="admin-dialer-10" step="1" value="89">
+                            </div>
+                        </div>
+
+                        <div class="admin-subsection">
+                            <h3>Dialer - Tier 20CC</h3>
+                            <div class="admin-field">
+                                <label>Precio mensual</label>
+                                <input type="number" id="admin-dialer-20" step="1" value="159">
+                            </div>
+                        </div>
+
+                        <div class="admin-subsection">
+                            <h3>Dialer - Tier 30CC</h3>
+                            <div class="admin-field">
+                                <label>Precio mensual</label>
+                                <input type="number" id="admin-dialer-30" step="1" value="219">
+                            </div>
+                        </div>
+
+                        <div class="admin-subsection">
+                            <h3>Dialer - Tier 50CC</h3>
+                            <div class="admin-field">
+                                <label>Precio mensual</label>
+                                <input type="number" id="admin-dialer-50" step="1" value="329">
+                            </div>
+                        </div>
+
+                        <div class="admin-subsection">
+                            <h3>Dialer - Tier 100CC</h3>
+                            <div class="admin-field">
+                                <label>Precio mensual</label>
+                                <input type="number" id="admin-dialer-100" step="1" value="549">
+                            </div>
+                        </div>
+
+                        <div class="admin-subsection">
+                            <h3>Dialer - Tier 200CC</h3>
+                            <div class="admin-field">
+                                <label>Precio mensual</label>
+                                <input type="number" id="admin-dialer-200" step="1" value="899">
+                            </div>
+                        </div>
+
+                        <div class="admin-subsection">
+                            <h3>Dialer - Tier 300CC</h3>
+                            <div class="admin-field">
+                                <label>Precio mensual</label>
+                                <input type="number" id="admin-dialer-300" step="1" value="1199">
+                            </div>
+                        </div>
+
+                        <!-- WA Business -->
+                        <div class="admin-subsection">
+                            <h3>WhatsApp Business</h3>
+                            <div class="admin-field">
+                                <label>Base (1 línea + 3 usuarios)</label>
+                                <input type="number" id="admin-wa-base" step="1" value="59">
+                            </div>
+                            <div class="admin-field">
+                                <label>Línea adicional</label>
+                                <input type="number" id="admin-wa-extra-line" step="1" value="25">
+                            </div>
+                            <div class="admin-field">
+                                <label>Usuario adicional</label>
+                                <input type="number" id="admin-wa-extra-user" step="1" value="10">
+                            </div>
+                            <div class="admin-field">
+                                <label>WA Calling - Saliente (/min)</label>
+                                <input type="number" id="admin-wa-outbound" step="0.01" value="0.04">
+                            </div>
+                            <div class="admin-field">
+                                <label>WA Calling - Entrante (/min)</label>
+                                <input type="number" id="admin-wa-inbound" step="0.01" value="0.02">
+                            </div>
+                        </div>
+
+                        <!-- Local Numbers -->
+                        <div class="admin-subsection">
+                            <h3>Números Locales</h3>
+                            <div class="admin-field">
+                                <label>USA - Precio por número/mes</label>
+                                <input type="number" id="admin-local-usa" step="0.01" value="9.95">
+                            </div>
+                            <div class="admin-field">
+                                <label>Otros países - Precio por número/mes</label>
+                                <input type="number" id="admin-local-other" step="0.01" value="15.00">
+                            </div>
+                        </div>
+
+                        <!-- Scan, Clean & Go -->
+                        <div class="admin-subsection">
+                            <h3>Scan, Clean & Go</h3>
+                            <div class="admin-field">
+                                <label>Precio por DID</label>
+                                <input type="number" id="admin-scg-per-did" step="0.0001" value="0.005">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="button-group" style="margin-top: 2rem;">
+                        <button class="button button-primary" onclick="saveAdminPrices()">💾 Guardar Cambios</button>
+                        <button class="button button-secondary" onclick="loadAdminPrices()">↻ Descartar Cambios</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Default prices
+        const PRICES = {
+            nueva: {
+                lite: { base: 99, users: 1, pbx: 1, userExtra: 10, pbxExtra: 20, waAddon: 25, chatdialAddon: 15 },
+                starter: { base: 149, users: 3, pbx: 2, userExtra: 10, pbxExtra: 20, waAddon: 25, chatdialAddon: 15 },
+                team: { base: 299, users: 8, pbx: 4, userExtra: 8, pbxExtra: 20, waAddon: 25, chatdialAddon: 15 },
+                business: { base: 499, users: 20, pbx: 8, userExtra: 6, pbxExtra: 20, waAddon: 25, chatdialAddon: 15 }
+            },
+            legacy: {
+                lite: { base: 79, users: 1, pbx: 1, userExtra: 12, pbxExtra: 25 },
+                starter: { base: 119, users: 3, pbx: 2, userExtra: 12, pbxExtra: 25 },
+                team: { base: 249, users: 8, pbx: 4, userExtra: 10, pbxExtra: 25 },
+                business: { base: 449, users: 20, pbx: 8, userExtra: 8, pbxExtra: 25 }
+            },
+            chatbot: {
+                tier1: { min: 2000, max: 2000, rate: 0.10, minimum: 50, workflows: 1 },
+                tier2: { min: 2001, max: 5000, rate: 0.08, minimum: 200, workflows: 2 },
+                tier3: { min: 5001, max: Infinity, rate: 0.06, minimum: 400, workflows: 5 },
+                extraWF: 50
+            },
+            dialer: {
+                5: 49,
+                10: 89,
+                20: 159,
+                30: 219,
+                50: 329,
+                100: 549,
+                200: 899,
+                300: 1199
+            },
+            wa: {
+                base: 59,
+                extraLine: 25,
+                extraUser: 10,
+                outbound: 0.04,
+                inbound: 0.02
+            },
+            local: {
+                usa: 9.95,
+                other: 15.00
+            },
+            scg: {
+                perDid: 0.005
+            }
+        };
+
+        let currentDialerTier = null;
+        let adminUnlocked = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPricesFromStorage();
+            addEventListeners();
+            updateAllCalculations();
+        });
+
+        // Load prices from localStorage
+        function loadPricesFromStorage() {
+            const stored = localStorage.getItem('picallex_calc_prices_v2');
+            if (stored) {
+                const loaded = JSON.parse(stored);
+                Object.assign(PRICES, loaded);
+            }
+        }
+
+        // Save prices to localStorage
+        function savePricesToStorage() {
+            localStorage.setItem('picallex_calc_prices_v2', JSON.stringify(PRICES));
+        }
+
+        // Add event listeners
+        function addEventListeners() {
+            // Nueva Oferta
+            ['lite', 'starter', 'team', 'business'].forEach(plan => {
+                document.getElementById(`nueva-${plan}-users`)?.addEventListener('input', () => updatePlan('nueva', plan));
+                document.getElementById(`nueva-${plan}-pbx`)?.addEventListener('input', () => updatePlan('nueva', plan));
+                document.getElementById(`nueva-${plan}-wa`)?.addEventListener('change', () => updatePlan('nueva', plan));
+                document.getElementById(`nueva-${plan}-chatdial`)?.addEventListener('change', () => updatePlan('nueva', plan));
+            });
+
+            // Legacy
+            ['lite', 'starter', 'team', 'business'].forEach(plan => {
+                document.getElementById(`legacy-${plan}-users`)?.addEventListener('input', () => updatePlan('legacy', plan));
+                document.getElementById(`legacy-${plan}-pbx`)?.addEventListener('input', () => updatePlan('legacy', plan));
+            });
+
+            // Transactional
+            document.getElementById('chatbot-conversations')?.addEventListener('input', updateChatBot);
+            document.getElementById('chatbot-extra-wf')?.addEventListener('input', updateChatBot);
+            document.getElementById('dialer-cc')?.addEventListener('input', updateDialer);
+            document.getElementById('wa-lines')?.addEventListener('input', updateWA);
+            document.getElementById('wa-users')?.addEventListener('input', updateWA);
+            document.getElementById('wa-minutes')?.addEventListener('input', updateWA);
+            document.getElementById('local-usa')?.addEventListener('input', updateLocalNumbers);
+            document.getElementById('local-other')?.addEventListener('input', updateLocalNumbers);
+            document.getElementById('scg-dids')?.addEventListener('input', updateSCG);
+        }
+
+        // Tab switching
+        function switchTab(index) {
+            document.querySelectorAll('.tab-content').forEach((el, i) => {
+                el.classList.toggle('active', i === index);
+            });
+            document.querySelectorAll('.tab-button').forEach((el, i) => {
+                el.classList.toggle('active', i === index);
+            });
+        }
+
+        // Update plan calculations
+        function updatePlan(oferta, plan) {
+            const config = PRICES[oferta][plan];
+            const users = parseInt(document.getElementById(`${oferta}-${plan}-users`)?.value || 0);
+            const pbx = parseInt(document.getElementById(`${oferta}-${plan}-pbx`)?.value || 0);
+            const wa = document.getElementById(`${oferta}-${plan}-wa`)?.checked ? config.waAddon || 0 : 0;
+            const chatdial = document.getElementById(`${oferta}-${plan}-chatdial`)?.checked ? config.chatdialAddon || 0 : 0;
+
+            const userCost = users * config.userExtra;
+            const pbxCost = pbx * config.pbxExtra;
+            const total = config.base + userCost + pbxCost + wa + chatdial;
+
+            document.getElementById(`${oferta}-${plan}-total`).textContent = `$${total.toFixed(2)}`;
+        }
+
+        // Update ChatBot
+        function updateChatBot() {
+            const conversations = parseInt(document.getElementById('chatbot-conversations').value || 0);
+            const extraWF = parseInt(document.getElementById('chatbot-extra-wf').value || 0);
+
+            let tier, tierName, rate, minimum, includedWF;
+            if (conversations <= 2000) {
+                tier = PRICES.chatbot.tier1;
+                tierName = 'Tier 1';
+            } else if (conversations <= 5000) {
+                tier = PRICES.chatbot.tier2;
+                tierName = 'Tier 2';
+            } else {
+                tier = PRICES.chatbot.tier3;
+                tierName = 'Tier 3';
+            }
+
+            rate = tier.rate;
+            minimum = tier.minimum;
+            includedWF = tier.workflows;
+
+            const convCost = Math.max(conversations * rate, minimum);
+            const extraWFCost = extraWF * PRICES.chatbot.extraWF;
+            const total = convCost + extraWFCost;
+
+            document.getElementById('chatbot-tier-display').textContent = tierName;
+            document.getElementById('chatbot-included-conv').textContent = conversations.toLocaleString();
+            document.getElementById('chatbot-conv-cost').textContent = `$${convCost.toFixed(2)}`;
+            document.getElementById('chatbot-included-wf').textContent = includedWF;
+            document.getElementById('chatbot-extra-wf-cost').textContent = `$${extraWFCost.toFixed(2)}`;
+            document.getElementById('chatbot-total').textContent = `$${total.toFixed(2)}`;
+        }
+
+        // Update Dialer
+        function updateDialer() {
+            const cc = parseInt(document.getElementById('dialer-cc').value || 0);
+            let recommended = 5;
+            let tier = PRICES.dialer[5];
+
+            if (cc > 250) recommended = 300;
+            else if (cc > 150) recommended = 200;
+            else if (cc > 80) recommended = 100;
+            else if (cc > 40) recommended = 50;
+            else if (cc > 25) recommended = 30;
+            else if (cc > 15) recommended = 20;
+            else if (cc > 8) recommended = 10;
+
+            tier = PRICES.dialer[recommended];
+            currentDialerTier = recommended;
+
+            document.getElementById('dialer-recommended').textContent = `${recommended} CC`;
+            document.getElementById('dialer-monthly').textContent = `$${tier}`;
+            document.getElementById('dialer-total').textContent = `$${(tier + 49)}`;
+
+            // Highlight selected tier
+            document.querySelectorAll('.tier-button').forEach(btn => btn.classList.remove('selected'));
+            const btnText = `${recommended} CC`;
+            Array.from(document.querySelectorAll('.tier-selection .tier-button')).find(btn => btn.textContent.includes(btnText))?.classList.add('selected');
+        }
+
+        function selectDialerTier(cc) {
+            currentDialerTier = cc;
+            const tier = PRICES.dialer[cc];
+            document.getElementById('dialer-recommended').textContent = `${cc} CC`;
+            document.getElementById('dialer-monthly').textContent = `$${tier}`;
+            document.getElementById('dialer-total').textContent = `$${(tier + 49)}`;
+
+            document.querySelectorAll('.tier-selection .tier-button').forEach(btn => btn.classList.remove('selected'));
+            const btnText = `${cc} CC`;
+            Array.from(document.querySelectorAll('.tier-selection .tier-button')).find(btn => btn.textContent.includes(btnText))?.classList.add('selected');
+        }
+
+        // Update WA
+        function updateWA() {
+            const lines = parseInt(document.getElementById('wa-lines').value || 1);
+            const users = parseInt(document.getElementById('wa-users').value || 0);
+            const minutes = parseInt(document.getElementById('wa-minutes').value || 0);
+
+            const basePrice = PRICES.wa.base;
+            const extraLinesCost = Math.max(0, lines - 1) * PRICES.wa.extraLine;
+            const extraUsersCost = Math.max(0, users) * PRICES.wa.extraUser;
+            const waCalling = minutes * ((PRICES.wa.outbound + PRICES.wa.inbound) / 2);
+
+            const total = basePrice + extraLinesCost + extraUsersCost + waCalling;
+
+            document.getElementById('wa-base').textContent = `$${basePrice}`;
+            document.getElementById('wa-extra-lines').textContent = `$${extraLinesCost.toFixed(2)}`;
+            document.getElementById('wa-extra-users').textContent = `$${extraUsersCost.toFixed(2)}`;
+            document.getElementById('wa-calling').textContent = `$${waCalling.toFixed(2)}`;
+            document.getElementById('wa-total').textContent = `$${total.toFixed(2)}`;
+        }
+
+        // Update Local Numbers
+        function updateLocalNumbers() {
+            const usa = parseInt(document.getElementById('local-usa').value || 0);
+            const other = parseInt(document.getElementById('local-other').value || 0);
+
+            const usaCost = usa * PRICES.local.usa;
+            const otherCost = other * PRICES.local.other;
+            const total = usaCost + otherCost;
+
+            document.getElementById('local-usa-cost').textContent = `$${usaCost.toFixed(2)}`;
+            document.getElementById('local-other-cost').textContent = `$${otherCost.toFixed(2)}`;
+            document.getElementById('local-total').textContent = `$${total.toFixed(2)}`;
+        }
+
+        // Update SCG
+        function updateSCG() {
+            const dids = parseInt(document.getElementById('scg-dids').value || 0);
+            const cost = dids * PRICES.scg.perDid;
+
+            document.getElementById('scg-dids-count').textContent = dids.toLocaleString();
+            document.getElementById('scg-price-per-did').textContent = `$${PRICES.scg.perDid.toFixed(4)}`;
+            document.getElementById('scg-total').textContent = `$${cost.toFixed(2)}`;
+        }
+
+        // Update Migration
+        function updateMigration() {
+            const plan = document.getElementById('migration-plan').value;
+            if (!plan) {
+                document.getElementById('migration-comparison').innerHTML = '';
+                return;
+            }
+
+            const legacy = PRICES.legacy[plan].base;
+            const nueva = PRICES.nueva[plan].base;
+            const savings = legacy - nueva;
+            const savingsPercent = (savings / legacy) * 100;
+
+            let trafficLight = 'red';
+            if (savingsPercent > 20) trafficLight = 'green';
+            else if (savingsPercent >= 5) trafficLight = 'yellow';
+
+            const html = `
+                <div style="background-color: #111132; border: 1px solid rgba(167,139,250,0.14); border-radius: 8px; padding: 2rem;">
+                    <table class="comparison-table">
+                        <tr>
+                            <td style="font-weight: 600; color: #A78BFA;">Plan ${plan.charAt(0).toUpperCase() + plan.slice(1)}</td>
+                            <td class="legacy-col" style="font-weight: 600; color: #EDE9FE;">Legacy</td>
+                            <td class="nueva-col" style="font-weight: 600; color: #EDE9FE;">Nueva Oferta</td>
+                        </tr>
+                        <tr>
+                            <td style="color: #7C6FAD;">Precio Base</td>
+                            <td class="legacy-col">$${legacy}</td>
+                            <td class="nueva-col">$${nueva}</td>
+                        </tr>
+                        <tr>
+                            <td style="color: #7C6FAD;">Ahorro Mensual</td>
+                            <td colspan="2">$${savings.toFixed(2)} (${savingsPercent.toFixed(1)}%)</td>
+                        </tr>
+                        <tr>
+                            <td style="color: #7C6FAD;">Ahorro Anual</td>
+                            <td colspan="2">$${(savings * 12).toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td style="color: #7C6FAD; font-weight: 600;">Recomendación</td>
+                            <td colspan="2">
+                                <span class="traffic-light ${trafficLight}"></span>
+                                ${trafficLight === 'green' ? 'Migrar a Nueva Oferta (Ahorro significativo)' : trafficLight === 'yellow' ? 'Considerar migración' : 'Ajustar parámetros'}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+
+            document.getElementById('migration-comparison').innerHTML = html;
+        }
+
+        // Update all calculations
+        function updateAllCalculations() {
+            ['lite', 'starter', 'team', 'business'].forEach(plan => {
+                updatePlan('nueva', plan);
+                updatePlan('legacy', plan);
+            });
+            updateChatBot();
+            updateDialer();
+            updateWA();
+            updateLocalNumbers();
+            updateSCG();
+        }
+
+        // Clear functions
+        function clearTab(tab) {
+            if (tab === 'nueva') {
+                ['lite', 'starter', 'team', 'business'].forEach(plan => {
+                    document.getElementById(`nueva-${plan}-users`).value = '0';
+                    document.getElementById(`nueva-${plan}-pbx`).value = '0';
+                    document.getElementById(`nueva-${plan}-wa`).checked = false;
+                    document.getElementById(`nueva-${plan}-chatdial`).checked = false;
+                    updatePlan('nueva', plan);
+                });
+            } else if (tab === 'legacy') {
+                ['lite', 'starter', 'team', 'business'].forEach(plan => {
+                    document.getElementById(`legacy-${plan}-users`).value = '0';
+                    document.getElementById(`legacy-${plan}-pbx`).value = '0';
+                    updatePlan('legacy', plan);
+                });
+            } else if (tab === 'migration') {
+                document.getElementById('migration-plan').value = '';
+                document.getElementById('migration-comparison').innerHTML = '';
+            }
+        }
+
+        function clearService(service) {
+            if (service === 'chatbot') {
+                document.getElementById('chatbot-conversations').value = '0';
+                document.getElementById('chatbot-extra-wf').value = '0';
+                updateChatBot();
+            } else if (service === 'dialer') {
+                document.getElementById('dialer-cc').value = '0';
+                updateDialer();
+            } else if (service === 'wa') {
+                document.getElementById('wa-lines').value = '1';
+                document.getElementById('wa-users').value = '0';
+                document.getElementById('wa-minutes').value = '0';
+                updateWA();
+            } else if (service === 'local') {
+                document.getElementById('local-usa').value = '0';
+                document.getElementById('local-other').value = '0';
+                updateLocalNumbers();
+            } else if (service === 'scg') {
+                document.getElementById('scg-dids').value = '0';
+                updateSCG();
+            }
+        }
+
+        // Admin functions
+        function verifyAdminPassword() {
+            const password = document.getElementById('admin-password').value;
+            if (password === 'admin2026') {
+                adminUnlocked = true;
+                document.getElementById('admin-password-section').classList.add('hidden');
+                document.getElementById('admin-content').classList.remove('hidden');
+                loadAdminPrices();
+            } else {
+                alert('Contraseña incorrecta');
+            }
+        }
+
+        function loadAdminPrices() {
+            if (!adminUnlocked) return;
+
+            document.getElementById('admin-chatbot-tier1-rate').value = PRICES.chatbot.tier1.rate;
+            document.getElementById('admin-chatbot-tier1-min').value = PRICES.chatbot.tier1.minimum;
+            document.getElementById('admin-chatbot-tier1-wf').value = PRICES.chatbot.tier1.workflows;
+
+            document.getElementById('admin-chatbot-tier2-rate').value = PRICES.chatbot.tier2.rate;
+            document.getElementById('admin-chatbot-tier2-min').value = PRICES.chatbot.tier2.minimum;
+            document.getElementById('admin-chatbot-tier2-wf').value = PRICES.chatbot.tier2.workflows;
+
+            document.getElementById('admin-chatbot-tier3-rate').value = PRICES.chatbot.tier3.rate;
+            document.getElementById('admin-chatbot-tier3-min').value = PRICES.chatbot.tier3.minimum;
+            document.getElementById('admin-chatbot-tier3-wf').value = PRICES.chatbot.tier3.workflows;
+
+            document.getElementById('admin-chatbot-extra-wf-price').value = PRICES.chatbot.extraWF;
+
+            [5, 10, 20, 30, 50, 100, 200, 300].forEach(cc => {
+                document.getElementById(`admin-dialer-${cc}`).value = PRICES.dialer[cc];
+            });
+
+            document.getElementById('admin-wa-base').value = PRICES.wa.base;
+            document.getElementById('admin-wa-extra-line').value = PRICES.wa.extraLine;
+            document.getElementById('admin-wa-extra-user').value = PRICES.wa.extraUser;
+            document.getElementById('admin-wa-outbound').value = PRICES.wa.outbound;
+            document.getElementById('admin-wa-inbound').value = PRICES.wa.inbound;
+
+            document.getElementById('admin-local-usa').value = PRICES.local.usa;
+            document.getElementById('admin-local-other').value = PRICES.local.other;
+
+            document.getElementById('admin-scg-per-did').value = PRICES.scg.perDid;
+        }
+
+        function saveAdminPrices() {
+            if (!adminUnlocked) return;
+
+            PRICES.chatbot.tier1.rate = parseFloat(document.getElementById('admin-chatbot-tier1-rate').value);
+            PRICES.chatbot.tier1.minimum = parseFloat(document.getElementById('admin-chatbot-tier1-min').value);
+            PRICES.chatbot.tier1.workflows = parseInt(document.getElementById('admin-chatbot-tier1-wf').value);
+
+            PRICES.chatbot.tier2.rate = parseFloat(document.getElementById('admin-chatbot-tier2-rate').value);
+            PRICES.chatbot.tier2.minimum = parseFloat(document.getElementById('admin-chatbot-tier2-min').value);
+            PRICES.chatbot.tier2.workflows = parseInt(document.getElementById('admin-chatbot-tier2-wf').value);
+
+            PRICES.chatbot.tier3.rate = parseFloat(document.getElementById('admin-chatbot-tier3-rate').value);
+            PRICES.chatbot.tier3.minimum = parseFloat(document.getElementById('admin-chatbot-tier3-min').value);
+            PRICES.chatbot.tier3.workflows = parseInt(document.getElementById('admin-chatbot-tier3-wf').value);
+
+            PRICES.chatbot.extraWF = parseFloat(document.getElementById('admin-chatbot-extra-wf-price').value);
+
+            [5, 10, 20, 30, 50, 100, 200, 300].forEach(cc => {
+                PRICES.dialer[cc] = parseInt(document.getElementById(`admin-dialer-${cc}`).value);
+            });
+
+            PRICES.wa.base = parseFloat(document.getElementById('admin-wa-base').value);
+            PRICES.wa.extraLine = parseFloat(document.getElementById('admin-wa-extra-line').value);
+            PRICES.wa.extraUser = parseFloat(document.getElementById('admin-wa-extra-user').value);
+            PRICES.wa.outbound = parseFloat(document.getElementById('admin-wa-outbound').value);
+            PRICES.wa.inbound = parseFloat(document.getElementById('admin-wa-inbound').value);
+
+            PRICES.local.usa = parseFloat(document.getElementById('admin-local-usa').value);
+            PRICES.local.other = parseFloat(document.getElementById('admin-local-other').value);
+
+            PRICES.scg.perDid = parseFloat(document.getElementById('admin-scg-per-did').value);
+
+            savePricesToStorage();
+            updateAllCalculations();
+            alert('✅ Precios guardados correctamente');
+        }
+    </script>
+</body>
+</html>
